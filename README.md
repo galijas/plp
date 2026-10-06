@@ -42,6 +42,7 @@ so later form edits never change them.
 
 1. On the server, clone the repository and run the installer:
    ```
+   sudo apt update && sudo apt install -y git
    git clone https://github.com/galijas/plp.git plportal
    cd plportal
    sudo ./install.sh
