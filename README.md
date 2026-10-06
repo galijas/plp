@@ -11,7 +11,7 @@ submissions.
   A code can be tied to one email or accept any email, is single use or
   unlimited, and expires after 1 week, 2 weeks, 1 month, 3 months or never.
   Admins send an **invite link** (`https://<host>/#invite=CODE&email=ADDRESS`)
-  that fills in the sign-in fields. Invite codes can also pre-fill answers.
+  that opens the sign-in page with the code and email filled in.
 - A client session can only read the form, save its own draft, upload files
   to its own draft and submit. Uploaded files are never served back to
   clients. Drafts auto-save, so clients can come back later with the same

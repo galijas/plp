@@ -2,7 +2,6 @@ package store
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"strings"
 	"time"
@@ -17,7 +16,6 @@ type Invite struct {
 	Uses      int
 	ExpiresAt *time.Time
 	RevokedAt *time.Time
-	Prefill   map[string]string // item ID -> text pre-filled into new drafts
 	CreatedAt time.Time
 	CreatedBy string
 }
@@ -47,13 +45,13 @@ func (inv *Invite) AllowsEmail(email string) bool {
 	return inv.Email == "" || strings.EqualFold(inv.Email, email)
 }
 
-const inviteCols = `id, code, email, label, max_uses, uses, expires_at, revoked_at, prefill, created_at, created_by`
+const inviteCols = `id, code, email, label, max_uses, uses, expires_at, revoked_at, created_at, created_by`
 
 func scanInvite(row interface{ Scan(...any) error }) (*Invite, error) {
 	var inv Invite
 	var exp, rev sql.NullString
-	var prefill, created string
-	if err := row.Scan(&inv.ID, &inv.Code, &inv.Email, &inv.Label, &inv.MaxUses, &inv.Uses, &exp, &rev, &prefill, &created, &inv.CreatedBy); err != nil {
+	var created string
+	if err := row.Scan(&inv.ID, &inv.Code, &inv.Email, &inv.Label, &inv.MaxUses, &inv.Uses, &exp, &rev, &created, &inv.CreatedBy); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotFound
 		}
@@ -61,21 +59,13 @@ func scanInvite(row interface{ Scan(...any) error }) (*Invite, error) {
 	}
 	inv.ExpiresAt, inv.RevokedAt = parseNullTS(exp), parseNullTS(rev)
 	inv.CreatedAt = parseTS(created)
-	json.Unmarshal([]byte(prefill), &inv.Prefill)
-	if inv.Prefill == nil {
-		inv.Prefill = map[string]string{}
-	}
 	return &inv, nil
 }
 
 func (s *Store) CreateInvite(inv *Invite) error {
-	pf, _ := json.Marshal(inv.Prefill)
-	if inv.Prefill == nil {
-		pf = []byte("{}")
-	}
 	inv.CreatedAt = time.Now()
-	res, err := s.db.Exec(`INSERT INTO invites(code, email, label, max_uses, expires_at, prefill, created_at, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-		inv.Code, inv.Email, inv.Label, inv.MaxUses, nullTS(inv.ExpiresAt), string(pf), ts(inv.CreatedAt), inv.CreatedBy)
+	res, err := s.db.Exec(`INSERT INTO invites(code, email, label, max_uses, expires_at, created_at, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		inv.Code, inv.Email, inv.Label, inv.MaxUses, nullTS(inv.ExpiresAt), ts(inv.CreatedAt), inv.CreatedBy)
 	if err != nil {
 		if strings.Contains(err.Error(), "UNIQUE") {
 			return ErrExists
@@ -111,11 +101,10 @@ func (s *Store) Invites() ([]Invite, error) {
 	return out, rows.Err()
 }
 
-// UpdateInvite saves the editable fields: label, email, uses, expiry and prefill.
+// UpdateInvite saves the editable fields: label, email, uses and expiry.
 func (s *Store) UpdateInvite(inv *Invite) error {
-	pf, _ := json.Marshal(inv.Prefill)
-	res, err := s.db.Exec(`UPDATE invites SET label = ?, email = ?, max_uses = ?, expires_at = ?, prefill = ? WHERE id = ?`,
-		inv.Label, inv.Email, inv.MaxUses, nullTS(inv.ExpiresAt), string(pf), inv.ID)
+	res, err := s.db.Exec(`UPDATE invites SET label = ?, email = ?, max_uses = ?, expires_at = ? WHERE id = ?`,
+		inv.Label, inv.Email, inv.MaxUses, nullTS(inv.ExpiresAt), inv.ID)
 	if err != nil {
 		return err
 	}

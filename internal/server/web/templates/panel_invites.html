@@ -6,7 +6,7 @@
   <div class="panel-body">
     {{template "flash" .}}
     <h1>Invite Codes</h1>
-    <p class="lede">Clients sign in with their email and an invite code. A code can be tied to one email or accept any email, and stops working when it expires, is revoked, or (for single-use codes) after one submission. Send clients the invite link: it fills in the code and email for them.</p>
+    <p class="lede">Clients sign in with their email and an invite code. A code can be tied to one email or accept any email, and stops working when it expires, is revoked, or (for single-use codes) after one submission. Send clients the invite link: it opens the sign-in page with the code and email already filled in.</p>
 
     <section class="card" aria-labelledby="new-code">
       <h2 id="new-code" class="flush-top">Create an invite code</h2>
@@ -41,21 +41,20 @@
           <label for="inv-label">Note <span class="hint">(optional, only admins see it)</span></label>
           <input type="text" id="inv-label" name="label" maxlength="200" placeholder="Client or ticket number">
         </div>
-        {{if $d.PrefillItems}}
-        <details class="more">
-          <summary>Pre-fill answers (optional)</summary>
-          <p class="muted flush-top">Answers entered here appear in the client's form when they first open it. They can still change them.</p>
-          {{range $d.PrefillItems}}
-          <div class="field">
-            <label for="pf-{{.ID}}">{{.Title}}</label>
-            <input type="text" id="pf-{{.ID}}" name="prefill_{{.ID}}" maxlength="1000">
-          </div>
-          {{end}}
-        </details>
-        {{end}}
         <button class="btn primary" type="submit">Create invite code</button>
       </form>
     </section>
+
+    {{if $d.Link}}
+    <section class="card" data-hl aria-labelledby="link-h">
+      <h2 id="link-h" class="flush-top">Invite link for <span class="code">{{$d.LinkCode}}</span></h2>
+      <p class="muted">Send this link to the client. It opens the sign-in page with the invite code{{if not $d.LinkAny}} and email{{end}} filled in{{if $d.LinkAny}}; the client enters their own email{{end}}.</p>
+      <div class="code-input">
+        <input type="text" value="{{$d.Link}}" readonly aria-label="Invite link" data-select-all>
+        <button class="btn primary" type="button" data-copy="{{$d.Link}}">Copy link</button>
+      </div>
+    </section>
+    {{end}}
 
     <h2>All codes</h2>
     {{if $d.Rows}}
@@ -110,19 +109,6 @@
                       <label for="e-label-{{.ID}}">Note</label>
                       <input type="text" id="e-label-{{.ID}}" name="label" maxlength="200" value="{{.Label}}">
                     </div>
-                    {{$pf := .Prefill}}{{$rid := .ID}}
-                    {{if $d.PrefillItems}}
-                    <details class="more"{{if $pf}} open{{end}}>
-                      <summary>Pre-fill answers</summary>
-                      <p class="muted flush-top">Used when a client opens the form for the first time. Drafts that already exist keep their answers.</p>
-                      {{range $d.PrefillItems}}
-                      <div class="field">
-                        <label for="e-pf-{{$rid}}-{{.ID}}">{{.Title}}</label>
-                        <input type="text" id="e-pf-{{$rid}}-{{.ID}}" name="prefill_{{.ID}}" maxlength="1000" value="{{index $pf .ID}}">
-                      </div>
-                      {{end}}
-                    </details>
-                    {{end}}
                   </div>
                   <div class="dlg-foot"><button class="btn" type="button" data-close>Cancel</button><button class="btn primary" type="submit">Save changes</button></div>
                 </form>

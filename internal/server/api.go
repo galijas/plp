@@ -69,12 +69,7 @@ func (s *Server) apiForm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if answers == nil {
-		// A new draft starts from the answers the admin pre-filled on the invite.
 		answers = formdef.Answers{}
-		for id, text := range g.Invite.Prefill {
-			answers[id] = formdef.Answer{Text: text}
-		}
-		answers = f.Clean(answers)
 	}
 	ups, err := s.st.Uploads(g.Invite.ID, g.Email)
 	if err != nil {

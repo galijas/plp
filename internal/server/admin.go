@@ -170,11 +170,15 @@ type inviteRow struct {
 }
 
 type invitesView struct {
-	Rows         []inviteRow
-	Expiry       []struct{ Value, Label string }
-	PrefillItems []formdef.Item
-	NewCode      string // suggested code for the create form
-	Highlight    int64
+	Rows      []inviteRow
+	Expiry    []struct{ Value, Label string }
+	NewCode   string // suggested code for the create form
+	Highlight int64
+	// Link is the invite link of the code just created or saved, shown
+	// above the table ready to copy.
+	Link     string
+	LinkCode string
+	LinkAny  bool // the code accepts any email, so the link has no email
 }
 
 func (s *Server) handleInvites(w http.ResponseWriter, r *http.Request) {
@@ -189,13 +193,8 @@ func (s *Server) handleInvites(w http.ResponseWriter, r *http.Request) {
 	v.Highlight, _ = strconv.ParseInt(r.URL.Query().Get("new"), 10, 64)
 	for _, inv := range invs {
 		v.Rows = append(v.Rows, inviteRow{Invite: inv, Status: inv.Status(), Submissions: counts[inv.ID]})
-	}
-	f, _, _ := s.st.CurrentForm()
-	for _, sec := range f.Sections {
-		for _, it := range sec.Items {
-			if it.Type == formdef.Short || it.Type == formdef.Paragraph {
-				v.PrefillItems = append(v.PrefillItems, it)
-			}
+		if inv.ID == v.Highlight {
+			v.Link, v.LinkCode, v.LinkAny = s.inviteLink(inv.Code, inv.Email), inv.Code, inv.Email == ""
 		}
 	}
 	s.render(w, r, http.StatusOK, "panel_invites.html", page{Title: "Invite Codes", Tab: "panel", Section: "invites", Data: v})
@@ -223,21 +222,6 @@ func (s *Server) readInviteForm(r *http.Request, inv *store.Invite) error {
 		inv.MaxUses = 0
 	default:
 		return errors.New("choose single use or unlimited")
-	}
-	f, _, _ := s.st.CurrentForm()
-	inv.Prefill = map[string]string{}
-	for _, sec := range f.Sections {
-		for _, it := range sec.Items {
-			if it.Type != formdef.Short && it.Type != formdef.Paragraph {
-				continue
-			}
-			if v := strings.TrimSpace(r.PostFormValue("prefill_" + it.ID)); v != "" {
-				if len(v) > 1000 {
-					return fmt.Errorf("the pre-filled answer for %q is too long", it.Title)
-				}
-				inv.Prefill[it.ID] = v
-			}
-		}
 	}
 	return nil
 }
@@ -274,7 +258,7 @@ func (s *Server) handleInviteCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.logAdmin(r, "invite.create", describeInvite(inv))
-	s.redirectFlash(w, r, "/admin/invites?new="+strconv.FormatInt(inv.ID, 10), "Created the code "+code+". Copy its invite link from the highlighted row.")
+	s.redirectFlash(w, r, "/admin/invites?new="+strconv.FormatInt(inv.ID, 10), "Created the code "+code+".")
 }
 
 func describeInvite(inv *store.Invite) string {
@@ -293,9 +277,6 @@ func describeInvite(inv *store.Invite) string {
 	d := fmt.Sprintf("%s for %s, %s, %s", inv.Code, who, uses, exp)
 	if inv.Label != "" {
 		d += ", note " + strconv.Quote(inv.Label)
-	}
-	if len(inv.Prefill) > 0 {
-		d += fmt.Sprintf(", %d pre-filled answer(s)", len(inv.Prefill))
 	}
 	return d
 }

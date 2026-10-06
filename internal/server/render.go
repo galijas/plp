@@ -44,17 +44,11 @@ func (s *Server) loadTemplates() error {
 			}
 			return t.In(s.loc).Format("2006-01-02 15:04")
 		},
-		"whenFull": func(t time.Time) string { return t.In(s.loc).Format("2006-01-02 15:04:05 MST") },
-		"bytes":    export.HumanBytes,
-		"inviteLink": func(code, email string) string {
-			v := url.Values{"invite": {code}}
-			if email != "" {
-				v.Set("email", email)
-			}
-			return s.publicURL() + "/#" + v.Encode()
-		},
-		"add": func(a, b int) int { return a + b },
-		"sub": func(a, b int) int { return a - b },
+		"whenFull":   func(t time.Time) string { return t.In(s.loc).Format("2006-01-02 15:04:05 MST") },
+		"bytes":      export.HumanBytes,
+		"inviteLink": s.inviteLink,
+		"add":        func(a, b int) int { return a + b },
+		"sub":        func(a, b int) int { return a - b },
 	}
 	s.pages = map[string]*template.Template{}
 	names, err := fs.Glob(webFS, "web/templates/*.html")
@@ -85,6 +79,16 @@ func (s *Server) loadTemplates() error {
 }
 
 func (s *Server) publicURL() string { return s.cfg.PublicURL }
+
+// inviteLink opens the sign-in page with the code (and the email, for a
+// code tied to one email) filled in.
+func (s *Server) inviteLink(code, email string) string {
+	v := url.Values{"invite": {code}}
+	if email != "" {
+		v.Set("email", email)
+	}
+	return s.publicURL() + "/#" + v.Encode()
+}
 
 func (s *Server) render(w http.ResponseWriter, r *http.Request, code int, name string, p page) {
 	t, ok := s.pages[name]

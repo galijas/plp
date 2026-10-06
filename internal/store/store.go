@@ -125,6 +125,10 @@ var migrations = []string{
 		key   TEXT PRIMARY KEY,
 		value TEXT NOT NULL
 	);`,
+
+	// 2: invite codes no longer pre-fill form answers (the invite link
+	// fills in the code and email instead).
+	`ALTER TABLE invites DROP COLUMN prefill;`,
 }
 
 func (s *Store) migrate() error {

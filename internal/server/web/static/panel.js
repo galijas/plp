@@ -91,7 +91,12 @@
     });
   }
 
+  // Clicking the invite link field selects the whole link.
+  document.querySelectorAll('[data-select-all]').forEach(function (el) {
+    el.addEventListener('focus', function () { el.select(); });
+  });
+
   // Bring a just-created or just-edited invite into view.
-  var hl = document.querySelector('tr.hl');
+  var hl = document.querySelector('section[data-hl]') || document.querySelector('tr.hl');
   if (hl) hl.scrollIntoView({ block: 'center' });
 })();
