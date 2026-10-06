@@ -36,17 +36,19 @@ cd "$(dirname "$0")"
 # --- Packages. A minimal Ubuntu image may lack ca-certificates, which
 # breaks every HTTPS call including Go's module downloads.
 NEED=()
-for p in ca-certificates curl git nftables tzdata; do dpkg -s "$p" >/dev/null 2>&1 || NEED+=("$p"); done
+for p in ca-certificates curl git nftables; do dpkg -s "$p" >/dev/null 2>&1 || NEED+=("$p"); done
 if [ ${#NEED[@]} -gt 0 ]; then
   log "installing: ${NEED[*]}"
   apt-get update -qq
   apt-get install -y -qq "${NEED[@]}"
 fi
 
-# --- Configuration: DNS name, Let's Encrypt email, time zone. Saved answers
+# --- Configuration: DNS name and Let's Encrypt email. Saved answers
 # are offered as defaults on re-runs, so Enter keeps them.
 PLP_DOMAIN=${PLP_DOMAIN:-}
 PLP_EMAIL=${PLP_EMAIL:-}
+# Time zone for displayed times and folder names; not asked. To change it,
+# edit PLP_TIMEZONE in the env file and restart the service.
 PLP_TIMEZONE=${PLP_TIMEZONE:-Europe/Sarajevo}
 PLP_MAX_MB=${PLP_MAX_MB:-3072}
 PLP_FIREWALL=${PLP_FIREWALL:-y}
@@ -70,11 +72,6 @@ while :; do
   ask PLP_EMAIL "Email address for Let's Encrypt" "$PLP_EMAIL"
   [[ "$PLP_EMAIL" =~ ^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$ ]] && break
   echo "  That doesn't look like an email address."
-done
-while :; do
-  ask PLP_TIMEZONE "Time zone for displayed times and folder names" "$PLP_TIMEZONE"
-  [ -f "/usr/share/zoneinfo/$PLP_TIMEZONE" ] && break
-  echo "  Unknown time zone. Examples: Europe/Sarajevo, America/Chicago, UTC."
 done
 
 # Host firewall questions (applied further down). The SSH port defaults to

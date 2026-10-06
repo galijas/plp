@@ -47,9 +47,9 @@ so later form edits never change them.
    cd plportal
    sudo ./install.sh
    ```
-   The script installs Go and the other dependencies, asks for the DNS name,
-   a Let's Encrypt email and the time zone, offers a host firewall (below),
-   builds the binary, sets up systemd services, gets the certificate and
+   The script installs Go and the other dependencies, asks for the DNS name
+   and a Let's Encrypt email, offers a host firewall (below), builds the
+   binary, sets up systemd services, gets the certificate and
    creates the first admin, printing its password once.
 2. Log in at `https://<host>/#admin`, set up SMTP under Admin Panel >
    Configure SMTP, and create invite codes.
@@ -76,7 +76,7 @@ sudo ./install.sh
 | What | Where |
 | --- | --- |
 | Service | `systemctl status plportal`, `journalctl -u plportal` |
-| Configuration | `/etc/plportal/plportal.env` (re-run `install.sh` to change) |
+| Configuration | `/etc/plportal/plportal.env` (re-run `install.sh` to change; time zone: edit `PLP_TIMEZONE`, default Europe/Sarajevo, then `systemctl restart plportal`) |
 | Database | `/var/lib/plportal/plportal.db` |
 | Submission folders | `/var/lib/plportal/submissions/` |
 | Unsent uploads (drafts) | `/var/lib/plportal/staging/` (incomplete uploads are removed after 48 h) |
