@@ -1,40 +1,103 @@
 # Project state
 
-## Status (2026-10-06)
+Read this first when continuing work.
 
-First complete version, built and tested locally (dev mode, headless Chrome
-screenshots in light/dark and phone width, curl end-to-end tests incl. a
-local SMTP sink). Not yet deployed.
+## RESUME HERE (2026-10-06)
+
+Live at https://privatelabel.dtbicom.xyz, running the latest commit
+(local, GitHub, Gitea and the VPS were all at the same commit at the end
+of 2026-10-06). Nothing is half-done. Open items are under "Next".
+
+- Repo: `~/claude/Projects/PrivateLabel_Portal`
+- Remotes: `origin` = git@github.com:galijas/plp.git,
+  `gitea` = git@tuzla.git.bicomsystems.com:amer.g/plp.git. Push to both.
+- Commits use author/committer `galiash <galijash@outlook.com>` (set via
+  GIT_AUTHOR_*/GIT_COMMITTER_* env vars; no global git identity here).
+- Go toolchain on the dev machine: `~/claude/.tools/go` with
+  `PATH=~/claude/.tools/go/bin:$PATH GOPATH=~/claude/.tools/gopath GOCACHE=~/claude/.tools/gocache GOTOOLCHAIN=local`.
+- Local test run: `bin/plportal create-admin -data-dir <dir> -username admin`,
+  then `bin/plportal serve -dev-addr 127.0.0.1:8090 -data-dir <dir>`.
+  UI review worked well with headless Chrome over CDP (screenshots in
+  light/dark, 1440/1100/390 px).
+
+### VPS
+
+- `privatelabel.dtbicom.xyz` = 161.129.58.234, Ubuntu 24.04, SERVERware VPS.
+- SSH as root on port 2020 (password auth; the password is given in the
+  session only and is never written to any file).
+- Repo on the VPS: `/root/plportal`. Saved install answers:
+  `/etc/plportal/plportal.env` (domain, Let's Encrypt email
+  amerg@bicomsystems.com, time zone Europe/Sarajevo, 3 GB per submission,
+  firewall on, SSH port 2020).
+- Deploy: push to both remotes, then on the VPS
+  `cd /root/plportal && git pull && yes "" | ./install.sh`
+  (Enter keeps every saved answer; the firewall rules don't change, so
+  the install doesn't stop for the SSH confirmation).
+- Checks: `systemctl status plportal plportal-firewall`,
+  `journalctl -u plportal -n 50`, `ss -tlnp` (expect sshd on 2020,
+  plportal on 80 and 443), `nft list table inet plportal_fw`.
+
+## What exists
+
+- Clients sign in with email + invite code (no accounts). Admins with
+  username/password ("Log in as admin" on the sign-in page, or `/#admin`).
+- Invite codes: tied to one email or any email; single use or unlimited;
+  expiry 1 week / 2 weeks / 1 month / 3 months / none, changeable later;
+  revoke/restore/delete; codes shown in plain text. Invite link
+  `https://<host>/#invite=CODE&email=ADDRESS` fills in the sign-in fields;
+  shown with a Copy button after creating/editing a code and on each row.
+- Form: copy of the Google Form (3 sections). Drafts auto-save; files
+  upload in 16 MB chunks, resumable; required answers checked client and
+  server side.
+- Admin tabs: Submission Form (preview + full editor: text, description
+  markup, type, required, options, upload limits, add/delete/reorder
+  items and sections; each save = new form version) and Admin Panel:
+  Submission Explorer (new tab), Invite Codes, Action Logs (filters,
+  CSV), Accounts, Security, Configure SMTP.
+- Submissions: folder `<email> - <YYYY-MM-DD HH-MM-SS>` with
+  `Form Answers - ….txt` (also HTML view and PDF with bold answers) and
+  `Uploaded Files - ….zip` (one folder per question). Answers are a
+  snapshot of the question wording at submit time.
+- SMTP notifications to every admin with an email; no answers in the
+  email, only a link.
+- Theme button "Theme: System/Dark/Light" (top right, remembered per
+  browser). Header and admin tabs centered. Font Inter (self-hosted).
+  Icon: document with upload arrow (from
+  ~/claude/Resources/PLP_Icon_black.png, redrawn as SVG; black on light,
+  white on dark; tab icon follows the portal theme).
 
 ## Decisions
 
-- Stack: one Go binary (embedded UI, SQLite via modernc, Let's Encrypt via
-  autocert), installed with `install.sh` like DT Collector. Only the install
-  approach follows DT Collector; UI and behavior are this project's own.
-- Access: email + invite code for clients (no accounts); admin username and
-  password. Invite codes are stored in plain text on purpose (admins must
-  see them); they are random 16-character codes (80 bits).
-- Code uses: configurable per code (single use / unlimited until expiry).
-- Form editor: full (text, required, type, options, upload limits, add,
-  delete, reorder items and sections). Each save is a new form version;
-  submissions store a snapshot of the questions and answers.
-- Drafts: auto-saved per (invite, email); uploads are staged per draft.
-- Uploads: chunked (16 MB), resumable, offset-checked; zip is stored
-  uncompressed at submit time.
-- SMTP: notifies every admin with an email address; the email has no
-  answers, only a link.
-- Visual design: print-proof theme (cool paper, navy ink, process cyan,
-  registration magenta for required/errors, crop marks around sign-in and
-  upload zones). Font: Schibsted Grotesk (OFL), self-hosted.
-- Host firewall: install.sh offers nftables rules (own table inet
-  plportal_fw, SSH ports from sshd + 80 + 443 inbound only), no ufw
-  (SERVERware VPS kernel lacks LOG/REJECT). New rules need confirmation
-  from a new SSH login within 3 minutes, else they roll back.
-- Theme selector: "Theme: System/Dark/Light" in the top-right, localStorage
-  key `plportal-theme`.
+- Stack: one Go binary (embedded UI, SQLite via modernc, Let's Encrypt
+  via autocert), installed with `install.sh`. DT Collector is only the
+  reference for how to install; UI and behavior are this project's own.
+- Code uses configurable per code; full form editor; drafts; SMTP: all
+  agreed with the user on 2026-10-06.
+- "Pre-fill" means the invite link fills in code and email. Pre-filled
+  form answers were built and then removed at the user's request
+  (migration 2 drops the column).
+- Host firewall: nftables only, own table `inet plportal_fw`, inbound
+  SSH port(s) + 80 + 443, outbound unfiltered. No ufw: the SERVERware VPS
+  kernel lacks iptables LOG/REJECT and can't load modules, so ufw fails.
+  New/changed rules roll back unless a new SSH login is confirmed within
+  3 minutes. (DT Collector's VPS has no host filtering: only empty ufw
+  leftover tables with policy accept.)
+- Time zone is not asked by the installer: Europe/Sarajevo, editable as
+  PLP_TIMEZONE in the env file.
+- Visual design: cool paper / navy ink / process cyan, magenta for
+  required and errors, crop marks around sign-in and upload zones.
+  Inline style attributes are blocked by the CSP; use classes.
 
 ## Next
 
-- Create the GitHub repo and push; deploy to the VPS.
-- After deploy: send a real test invite, check the certificate, SMTP with
-  the real relay, and a large (1 GB) upload over the internet.
+- Configure SMTP on the live site with the real relay and send a test.
+- Try a real client flow end to end over the internet, including a large
+  (about 1 GB) upload.
+- Mid-size screens (960 to 1340 px): the form and section overview are
+  centered together, so the form sits slightly right of center. The user
+  hasn't said whether to narrow the form there instead.
+- Optional, offered but not requested: the same nftables firewall in DT
+  Collector's installer; cleanup of the empty ufw tables on the DT
+  Collector VPS.
+- Daily backup covers the database only; submission files in
+  /var/lib/plportal/submissions need a separate file backup.
