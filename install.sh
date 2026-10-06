@@ -36,7 +36,7 @@ cd "$(dirname "$0")"
 # --- Packages. A minimal Ubuntu image may lack ca-certificates, which
 # breaks every HTTPS call including Go's module downloads.
 NEED=()
-for p in ca-certificates curl git nftables; do dpkg -s "$p" >/dev/null 2>&1 || NEED+=("$p"); done
+for p in ca-certificates curl git nftables tzdata; do dpkg -s "$p" >/dev/null 2>&1 || NEED+=("$p"); done
 if [ ${#NEED[@]} -gt 0 ]; then
   log "installing: ${NEED[*]}"
   apt-get update -qq
