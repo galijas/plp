@@ -5,7 +5,7 @@
   <section class="signin crop" aria-labelledby="signin-title">
     <div id="guest-panel"{{if and $v (eq $v.Mode "admin")}} hidden{{end}}>
       <h1 id="signin-title">Private Label Portal</h1>
-      <p class="lede">Sign in with your email and the invite code from your Bicom Systems project ticket to fill in the branding form.</p>
+      <p class="lede">Sign in using your email address and the invite code you received from a Bicom Systems representative.</p>
       {{if and $v (eq $v.Mode "guest") $v.Error}}<p class="flash error" role="alert">{{$v.Error}}</p>{{end}}
       <form method="post" action="/login/guest" id="guest-form">
         <div class="field">
