@@ -18,6 +18,10 @@
     var c = choice();
     var dark = c === 'dark' || (c === 'system' && media && media.matches);
     document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+    // Tab icon: black on the light theme, white on the dark theme.
+    document.querySelectorAll('link[rel=icon][data-dark]').forEach(function (l) {
+      l.setAttribute('href', dark ? l.dataset.dark : l.dataset.light);
+    });
     var label = document.getElementById('theme-label');
     if (label) label.textContent = CHOICES[c];
     document.querySelectorAll('#theme-menu [data-theme-choice]').forEach(function (b) {

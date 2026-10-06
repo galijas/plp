@@ -89,8 +89,8 @@ func New(cfg Config) (*Server, error) {
 	mux.Handle("GET /static/", http.StripPrefix("/static/", staticHandler(http.FileServerFS(static))))
 	mux.HandleFunc("GET /favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "public, max-age=86400")
-		w.Header().Set("Content-Type", "image/svg+xml")
-		b, _ := webFS.ReadFile("web/static/icon.svg")
+		w.Header().Set("Content-Type", "image/png")
+		b, _ := webFS.ReadFile("web/static/icons/plp-black-32.png")
 		w.Write(b)
 	})
 
