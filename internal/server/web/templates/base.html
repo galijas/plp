@@ -9,28 +9,29 @@
 <link rel="icon" type="image/svg+xml" href="/static/icons/plp-black.svg?v={{.Asset}}" data-light="/static/icons/plp-black.svg?v={{.Asset}}" data-dark="/static/icons/plp-white.svg?v={{.Asset}}">
 <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/plp-black-32.png?v={{.Asset}}" data-light="/static/icons/plp-black-32.png?v={{.Asset}}" data-dark="/static/icons/plp-white-32.png?v={{.Asset}}">
 <script src="/static/theme.js?v={{.Asset}}"></script>
-<link rel="preload" href="/static/fonts/schibsted-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/static/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/static/app.css?v={{.Asset}}">
 {{block "scripts" .}}{{end}}
 </head>
 <body>
 <header class="topbar">
   <a class="brand" href="/">{{template "mark"}}<span>Private Label Portal</span></a>
-  <div class="spacer"></div>
-  {{- if .Admin}}
-  <span class="who" title="Signed in as admin">{{.Admin.Username}} (admin)</span>
-  <form method="post" action="/logout"><button class="btn quiet small" type="submit">Log out</button></form>
-  {{- else if .GuestEmail}}
-  <span class="who">{{.GuestEmail}}</span>
-  <form method="post" action="/logout"><button class="btn quiet small" type="submit">Log out</button></form>
-  {{- end}}
-  <div class="theme">
-    <button class="theme-btn" id="theme-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="theme-menu">Theme: <span id="theme-label">System</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
-    <ul class="theme-menu" id="theme-menu" role="menu" hidden>
-      <li role="none"><button type="button" role="menuitemradio" data-theme-choice="system" aria-checked="true">System</button></li>
-      <li role="none"><button type="button" role="menuitemradio" data-theme-choice="dark" aria-checked="false">Dark</button></li>
-      <li role="none"><button type="button" role="menuitemradio" data-theme-choice="light" aria-checked="false">Light</button></li>
-    </ul>
+  <div class="top-right">
+    {{- if .Admin}}
+    <span class="who" title="Signed in as admin">{{.Admin.Username}} (admin)</span>
+    <form method="post" action="/logout"><button class="btn quiet small" type="submit">Log out</button></form>
+    {{- else if .GuestEmail}}
+    <span class="who">{{.GuestEmail}}</span>
+    <form method="post" action="/logout"><button class="btn quiet small" type="submit">Log out</button></form>
+    {{- end}}
+    <div class="theme">
+      <button class="theme-btn" id="theme-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="theme-menu">Theme: <span id="theme-label">System</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+      <ul class="theme-menu" id="theme-menu" role="menu" hidden>
+        <li role="none"><button type="button" role="menuitemradio" data-theme-choice="system" aria-checked="true">System</button></li>
+        <li role="none"><button type="button" role="menuitemradio" data-theme-choice="dark" aria-checked="false">Dark</button></li>
+        <li role="none"><button type="button" role="menuitemradio" data-theme-choice="light" aria-checked="false">Light</button></li>
+      </ul>
+    </div>
   </div>
 </header>
 {{- if and .Admin .Tab}}

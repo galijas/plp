@@ -1,5 +1,7 @@
 /* Private Label Portal
  *
+ * Font: Inter (Bicom Systems' default), self-hosted.
+ *
  * The portal collects branding material, so it borrows from the print
  * proof: cool paper, navy ink, one process-cyan accent for actions, and
  * registration magenta only for "required" and errors. Crop marks frame
@@ -7,19 +9,19 @@
  */
 
 @font-face {
-  font-family: "Schibsted Grotesk";
+  font-family: "Inter";
   font-style: normal;
   font-weight: 400 700;
   font-display: swap;
-  src: url(fonts/schibsted-latin.woff2) format("woff2");
+  src: url(fonts/inter-latin.woff2) format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 @font-face {
-  font-family: "Schibsted Grotesk";
+  font-family: "Inter";
   font-style: normal;
   font-weight: 400 700;
   font-display: swap;
-  src: url(fonts/schibsted-latin-ext.woff2) format("woff2");
+  src: url(fonts/inter-latin-ext.woff2) format("woff2");
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
@@ -82,7 +84,7 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font: 400 16px/1.55 "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font: 400 16px/1.55 "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -107,7 +109,8 @@ code, .code { font-family: var(--mono); font-size: .92em; }
 /* ---------- Top bar ---------- */
 
 .topbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 16px;
   padding: 12px 24px;
@@ -115,6 +118,15 @@ code, .code { font-family: var(--mono); font-size: .92em; }
   background: var(--sheet);
   position: relative;
   z-index: 20;
+}
+.topbar .brand { grid-column: 2; }
+.top-right {
+  grid-column: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  min-width: 0;
 }
 
 .brand {
@@ -128,8 +140,6 @@ code, .code { font-family: var(--mono); font-size: .92em; }
   white-space: nowrap;
 }
 .brand svg { width: 26px; height: 26px; color: var(--icon); flex: none; }
-
-.topbar .spacer { flex: 1; }
 
 .who {
   color: var(--ink-2);
@@ -199,6 +209,7 @@ code, .code { font-family: var(--mono); font-size: .92em; }
   background: var(--sheet);
   border-bottom: 1px solid var(--rule);
   overflow-x: auto;
+  justify-content: center;
 }
 .tabs a {
   padding: 11px 14px 10px;
@@ -367,11 +378,12 @@ input[type="radio"], input[type="checkbox"] { accent-color: var(--cyan); width: 
 
 .form-layout {
   display: grid;
-  grid-template-columns: 240px minmax(0, 720px);
-  gap: 56px;
-  justify-content: center;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 720px) minmax(0, 1fr);
+  gap: 48px;
   padding: 40px 24px 120px;
 }
+.form-layout > .rail { grid-column: 1; justify-self: end; width: 240px; }
+.form-layout > .form-main { grid-column: 2; }
 
 .rail { position: sticky; top: 24px; align-self: start; font-size: .9375rem; }
 .rail ol { list-style: none; margin: 0; padding: 0; counter-reset: s; }
@@ -739,8 +751,14 @@ dialog .dlg-foot { display: flex; gap: 8px; justify-content: flex-end; padding: 
 
 /* ---------- Small screens ---------- */
 
+@media (max-width: 1340px) {
+  .form-layout { grid-template-columns: 220px minmax(0, 720px); justify-content: center; gap: 40px; }
+  .form-layout > .rail { width: auto; justify-self: stretch; }
+}
+
 @media (max-width: 960px) {
   .form-layout { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 28px 16px 120px; }
+  .form-layout > .rail, .form-layout > .form-main { grid-column: 1; }
   .rail { position: static; margin-bottom: 8px; }
   .rail ol { display: none; }
   .rail .status { margin-top: 0; }
@@ -753,9 +771,10 @@ dialog .dlg-foot { display: flex; gap: 8px; justify-content: flex-end; padding: 
 }
 
 @media (max-width: 640px) {
-  .topbar { padding: 10px 16px; gap: 10px; flex-wrap: wrap; }
+  .topbar { display: flex; flex-wrap: wrap; padding: 10px 16px; gap: 10px; }
+  .top-right { flex: 1; gap: 10px; }
   .brand span { display: none; }
-  .who { order: 5; flex-basis: 100%; }
+  .who { display: none; }
   .tabs { padding: 0 8px; }
   .signin { padding: 28px 22px 22px; }
   .fileitem { grid-template-columns: 30px minmax(0, 1fr); }
