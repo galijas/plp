@@ -40,18 +40,17 @@ so later form edits never change them.
 
 ## Install (Ubuntu 24.04)
 
-1. Create a DNS A record for the server, and allow ports 80 and 443 to it in
-   the SERVERware firewall.
-2. On the server:
+1. On the server, clone the repository and run the installer:
    ```
-   git clone <repo url> plportal && cd plportal
+   git clone https://github.com/galijas/plp.git plportal
+   cd plportal
    sudo ./install.sh
    ```
    The script installs Go and the other dependencies, asks for the DNS name,
    a Let's Encrypt email and the time zone, offers a host firewall (below),
    builds the binary, sets up systemd services, gets the certificate and
    creates the first admin, printing its password once.
-3. Log in at `https://<host>/#admin`, set up SMTP under Admin Panel >
+2. Log in at `https://<host>/#admin`, set up SMTP under Admin Panel >
    Configure SMTP, and create invite codes.
 
 **Host firewall:** `install.sh` offers an nftables firewall that lets in only
@@ -64,8 +63,12 @@ script asks you to confirm that a new SSH login works and rolls back after
 `inet plportal_fw`), loaded at boot by `plportal-firewall.service`. Answer
 "n" on a re-run to remove it.
 
-**Upgrade:** `cd plportal && git pull && sudo ./install.sh` (press Enter to
-keep the saved answers).
+**Upgrade** (press Enter at the prompts to keep the saved answers):
+```
+cd plportal
+git pull
+sudo ./install.sh
+```
 
 ## Operations
 
