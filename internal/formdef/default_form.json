@@ -1,0 +1,250 @@
+{
+  "title": "Private Label Branding Resources and Requirements",
+  "description": "The purpose of this form is to gather all resources and explain all the requirements needed for the Private Label project. Please answer all the questions in this form and provide all the requested resources either by uploading them in this form or by sending the files via email on the project ticket thread. Additionally, please acknowledge all the requirements and tasks that need to be completed on your side once they are done.\n\nFor any questions or additional explanations, please reach out to us via email on the project ticket thread. Please note that completing this form should be treated as a top priority.",
+  "sections": [
+    {
+      "id": "general",
+      "title": "General Information",
+      "description": "General information about your company",
+      "items": [
+        {
+          "id": "company_name",
+          "type": "short",
+          "title": "Company Name:",
+          "description": "Exact company name with upper and lower case in mind (e.g. **Bicom Systems Ltd.**).",
+          "required": true
+        },
+        {
+          "id": "company_url",
+          "type": "short",
+          "title": "Company Home Page URL:",
+          "description": "When the user clicks on the banner in the main window, this URL will open.",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "glocom",
+      "title": "gloCOM",
+      "description": "Information required for creating a Private Label gloCOM application",
+      "items": [
+        {
+          "id": "app_name",
+          "type": "short",
+          "title": "Application Name:",
+          "description": "Exact application name with upper and lower case in mind (e.g. gloCOM).",
+          "required": true
+        },
+        {
+          "id": "support_url",
+          "type": "short",
+          "title": "Product Support Page URL (Help & Documentation):",
+          "description": "When the user clicks on 'Help', this URL will open.",
+          "required": true
+        },
+        {
+          "id": "privacy_url",
+          "type": "short",
+          "title": "Privacy Policy URL:",
+          "description": "URL that directs to a page detailing your company's Privacy Policy.",
+          "required": true
+        },
+        {
+          "id": "code_sign",
+          "type": "radio",
+          "title": "Code Sign (Windows):",
+          "description": "Please follow the guide at this [URL](https://msdn.microsoft.com/en-us/library/windows/desktop/ms537361(v=vs.85).aspx#The_Application_Proc). Once you obtain the **Code Signing Certificate**, please send it to us.\n\n**Please note:** Due to recent regulatory changes, the Code Signing Certificate can no longer be obtained in digital form. You will need to source the USB and then ship it to us. Please click on this [URL](https://drive.google.com/file/d/1orGL4dagr3CyZUVArNwFMHtSArhdn-i0/view?usp=sharing) to see the instructions on How to ship to Bicom Systems in Bosnia and Herzegovina.\n\nIn case you do not send this, we will sign the app with the Bicom Systems certificate, which will display Bicom Systems as the app publisher during installation.\n\nPlease select which option for Code signing on Windows you wish to use:",
+          "required": true,
+          "options": [
+            "I will obtain the code signing certificate on USB and ship it to Bicom Systems in Bosnia and Herzegovina.",
+            "I want to use the Bicom Systems code signing certificate (during installation, it will state that the app publisher is Bicom Systems).",
+            "I do not want to use any code signing certificate (the app will show as unverified and not secure during Windows installation)."
+          ]
+        },
+        {
+          "id": "google_project_id",
+          "type": "short",
+          "title": "Google Contacts Sync: Project ID",
+          "description": "To sync Google contacts, you need to create a Google Cloud Platform project for your brand. A full guide is provided at this [URL](https://docs.google.com/document/d/1SK7Ni1ZwDAYxCjaTRSENthWz1uvhwnH_pm4Iv0wVz7g/edit#heading=h.5yhyi46kwekz).\n\nOnce you send us your project ID and secret, we can integrate it into the desktop application.\n\nIf you do not wish to sync Google contacts, please enter '**DECLINE**' in the following two fields (project ID and secret).\n\nPlease enter the project ID in the field below:",
+          "required": true
+        },
+        {
+          "id": "google_secret",
+          "type": "short",
+          "title": "Google Contacts Sync: Secret",
+          "description": "Please enter the secret in the field below:",
+          "required": true
+        },
+        {
+          "id": "browser_ext",
+          "type": "info",
+          "title": "Browser Extensions:",
+          "description": "We support Chrome and Firefox through their respective stores. Edge users can also use Chrome extensions. Safari packages can be downloaded through the client app and installed manually, while Internet Explorer works out of the box.\n\nWe will create replacements for these extensions ([gloCOM Call - Chrome](https://chromewebstore.google.com/detail/glocom-call/fmeenkjnbikclpgbonadanhnipgmofhn) and [gloCOM Call - Firefox](https://addons.mozilla.org/en-US/firefox/addon/glocom-call/)) with your branding and send them to you once the integration of your brand is completed. You can publish them by following the guides below:\n\n- [How to publish in Chrome Web Store](https://developer.chrome.com/docs/webstore/publish/). Additional instructions on how to publish to the Chrome Web Store can be found in this [guide](https://docs.google.com/document/d/1ltCpL2D-1MeB97yTKhrxmDYBXS_jh4s8tj7YaeHy_6I/edit?usp=sharing).\n- [How to publish in Firefox store](https://extensionworkshop.com/documentation/publish/submitting-an-add-on/). Additional instructions on how to publish in the Firefox Add-ons Store can be found in this [guide](https://docs.google.com/document/d/1g_L823jxejl5aFwsDlFVU3oJi78qzhUCUqnh3TFNjtI/edit?usp=sharing).\n- Microsoft Edge is now based on Chromium, so our old Edge appx extensions don't work. Fortunately, users can install Chrome extensions directly in Edge, so we will use the same extension for both Chrome and Edge.\n- Safari: We will provide you with the .zip file that you need to place in a publicly accessible location and send us the URL. We will then include that URL in the client application, allowing clients to download it from there.\n\nPlease copy this section and the links for later use (once the integration of your brand is complete and we send you the extensions/add-ons). You can also reach out to us via email on the project ticket thread, and we will provide you with this guide.",
+          "required": false
+        },
+        {
+          "id": "visual",
+          "type": "info",
+          "title": "Visual",
+          "description": "The image at this [link](https://downloads.bicomsystems.com/desktop/oem/oem_branding.png) shows some of the user interface elements that will be branded.",
+          "required": false
+        },
+        {
+          "id": "desktop_images",
+          "type": "file",
+          "title": "App Icon and Company Logo Images:",
+          "description": "Please click on this [LINK](https://downloads.bicomsystems.com/desktop/oem/oem_images.zip) to download the .zip file containing all the images and icon files required to create your Private Label Branded gloCOM application.\n\nThe downloaded folder will include some examples of these required images and icon files. You will need to add or replace all the necessary images and icon files in the folder, rename the folder to your company name, compress (zip) it again, and upload it by clicking on the \"Add file\" button.\n\nOptionally, you can send the compressed file via email on the project ticket thread.\n\nPlease adhere to all specified image formats, dimensions, names, and folder structure.\n\nAs you will see in the ZIP file, additional tray icons will be required specifically for OSX. One is for dark tray mode, and the other is for light tray mode. Additionally, retina images are required for OSX. You will see in the ZIP file that their names have the '@2x' suffix.",
+          "required": true,
+          "maxFiles": 5,
+          "maxFileMB": 1024,
+          "accept": [
+            ".zip",
+            ".png",
+            ".svg",
+            ".eps",
+            ".ai",
+            ".pdf",
+            ".ico",
+            ".jpg",
+            ".jpeg"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "glocomgo",
+      "title": "gloCOM GO",
+      "description": "Information required for creating Private Label gloCOM GO (mobile) and web applications.",
+      "items": [
+        {
+          "id": "mobile_app_name",
+          "type": "short",
+          "title": "Mobile Application Name:",
+          "description": "Exact mobile application name with upper and lower case in mind (e.g. gloCOM GO).",
+          "required": true
+        },
+        {
+          "id": "mobile_support_url",
+          "type": "short",
+          "title": "Product Support Page URL (Help & Documentation) for Mobile Applications:",
+          "description": "When the user clicks on 'Help', this URL will open.",
+          "required": true
+        },
+        {
+          "id": "mobile_privacy_url",
+          "type": "short",
+          "title": "Privacy Policy URL for Mobile Applications:",
+          "description": "URL that directs to a page detailing your company's Privacy Policy.",
+          "required": true
+        },
+        {
+          "id": "ios",
+          "type": "info",
+          "title": "iOS",
+          "description": "Resources and Requirements for iOS mobile application.",
+          "required": false
+        },
+        {
+          "id": "ios_images",
+          "type": "file",
+          "title": "iOS App Icons and Company Logos:",
+          "description": "Please add the three files listed below to a folder, rename the folder to '**iOS + Your Company Name**', compress (zip) the folder, and upload it by clicking on the 'Add file' button.\n\nOptionally, you can send the compressed file via email in the project ticket thread.\n\nPlease adhere to all specified image formats and dimensions.\n\n- Company logo (transparent): 420x140 px\n- App icon for the App Store: 1024x1024 px\n- App icon (only symbol, transparent): 512x512 px\n\nIf you have a vector file of your app symbol (.eps, .svg, .ai), that will be great and will result in **MUCH** better resource quality.",
+          "required": true,
+          "maxFiles": 5,
+          "maxFileMB": 1024,
+          "accept": [
+            ".zip",
+            ".png",
+            ".svg",
+            ".eps",
+            ".ai",
+            ".pdf",
+            ".ico",
+            ".jpg",
+            ".jpeg"
+          ]
+        },
+        {
+          "id": "ios_appstore",
+          "type": "checkbox",
+          "title": "iOS - App Store Connect Access:",
+          "description": "Access to App Store Connect for our developers to publish and manage the app.\n\nPlease add the following developers' email addresses:",
+          "required": true,
+          "options": [
+            "amina@bicomsystems.com",
+            "lejla@bicomsystems.com",
+            "tarikd@bicomsystems.com"
+          ]
+        },
+        {
+          "id": "android",
+          "type": "info",
+          "title": "Android",
+          "description": "Resources and Requirements for android mobile application.",
+          "required": false
+        },
+        {
+          "id": "android_images",
+          "type": "file",
+          "title": "Android App Icons and Company Logos:",
+          "description": "Please add the file listed below to a folder, rename the folder to '**Android + Your Company Name**', compress (zip) the folder, and upload it by clicking on the 'Add file' button.\n\nOptionally, you can send the compressed file via email in the project ticket thread.\n\nPlease adhere to all specified image formats and dimensions.\n\n- App icon (only symbol, transparent): 512x512px\n\nWe will use this logo to create launcher icons and in-app logos.\n\nIf you have a vector file of your app symbol (.eps, .svg, .ai), that will be great and will result in **MUCH** better resource quality.",
+          "required": true,
+          "maxFiles": 5,
+          "maxFileMB": 1024,
+          "accept": [
+            ".zip",
+            ".png",
+            ".svg",
+            ".eps",
+            ".ai",
+            ".pdf",
+            ".ico",
+            ".jpg",
+            ".jpeg"
+          ]
+        },
+        {
+          "id": "android_publish",
+          "type": "info",
+          "title": "Android - Publishing an App on the Google Play Store:",
+          "description": "For publishing the Android app, we will send you a prepared app bundle for each release. You'll need to create a Play Store account and be responsible for publishing the app on the Play Store.\n\nInstructions on how to create an account and publish the app can be found at the following links:\n\n- [How to Get Started with Play Console](https://support.google.com/googleplay/android-developer/answer/6112435?hl=en)\n- [Prepare and Roll Out a Release](https://support.google.com/googleplay/android-developer/answer/9859348)\n\nPlease save these links for later use (once the integration of your brand is complete and we send you the prepared app bundle). You can also reach out to us via email on the project ticket thread, and we will provide you with this guide.",
+          "required": false
+        },
+        {
+          "id": "web",
+          "type": "info",
+          "title": "Web",
+          "description": "Resources and Requirements for web application.",
+          "required": false
+        },
+        {
+          "id": "meeting_domain",
+          "type": "short",
+          "title": "Meeting Web App Domain:",
+          "description": "Please enter the domain that will be used by the Meeting web app:",
+          "required": true
+        },
+        {
+          "id": "web_images",
+          "type": "file",
+          "title": "Web App Icons and Company Logos:",
+          "description": "Please add the required files listed below to a folder, rename the folder to '**Web + Your Company Name**', compress (zip) the folder, and upload it by clicking on the 'Add file' button.\n\nOptionally, you can send the compressed file via email in the project ticket thread.\n\nPlease adhere to all specified image formats and dimensions.\n\n**Required web app files:**\n\n- App favicon (.ico)\n- App Logo (transparent): 48x48 px\n- Company Logo (transparent): 84x28 px\n\n**Optional Meeting web app files:**\n\n- Meeting App favicon (.ico)\n- Meeting App Logo (transparent): 48x48 px\n\nFiles for the Meeting web app are optional. If you do not upload different files for the Meeting web app, same files will be used for both the gloCOM web app and the Meeting web app.\n\nIf you wish to upload files for the Meeting web app, please include \"Meeting\" in the file names to differentiate them.\n\nIf you have a vector file of your app symbol (.eps, .svg, .ai), that will be great and will result in **MUCH** better resource quality.",
+          "required": true,
+          "maxFiles": 5,
+          "maxFileMB": 1024,
+          "accept": [
+            ".zip",
+            ".png",
+            ".svg",
+            ".eps",
+            ".ai",
+            ".pdf",
+            ".ico",
+            ".jpg",
+            ".jpeg"
+          ]
+        }
+      ]
+    }
+  ]
+}

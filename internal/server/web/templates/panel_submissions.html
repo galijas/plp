@@ -1,0 +1,28 @@
+{{define "scripts"}}<script src="/static/panel.js?v={{.Asset}}" defer></script>{{end}}
+{{define "content"}}
+<div class="panel">
+  {{template "panelnav" .}}
+  <div class="panel-body">
+    {{template "flash" .}}
+    <h1>Submission Explorer</h1>
+    <p class="lede">Every submission is a folder named after the client's email and the submission time. Each folder holds the form answers (text, viewable and downloadable as PDF) and a zip of the uploaded files.</p>
+    <p><a class="btn primary" href="/explorer" target="_blank" rel="noopener">Open the Submission Explorer</a> <span class="muted">&nbsp;Opens in a new tab · {{.Data.Total}} submission{{if ne .Data.Total 1}}s{{end}}</span></p>
+
+    <h2>Latest submissions</h2>
+    {{if .Data.Recent}}
+    <ul class="folders">
+      {{range .Data.Recent}}
+      <li><a href="/explorer/{{.ID}}" target="_blank" rel="noopener">
+        {{template "folder-icon"}}
+        <span class="fname">{{.Folder}}</span>
+        <span class="fmeta">{{if .Label}}{{.Label}} · {{end}}code {{.InviteCode}}</span>
+        <span class="fside">{{.FilesCount}} file{{if ne .FilesCount 1}}s{{end}}<br>{{bytes .FilesBytes}}</span>
+      </a></li>
+      {{end}}
+    </ul>
+    {{else}}
+    <div class="card empty">No submissions yet. Create an invite code in <a href="/admin/invites">Invite Codes</a> and send the link to a client.</div>
+    {{end}}
+  </div>
+</div>
+{{end}}

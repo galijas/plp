@@ -1,0 +1,68 @@
+{{define "base"}}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<title>{{.Title}} · Private Label Portal</title>
+<link rel="icon" type="image/svg+xml" href="/static/icon.svg?v={{.Asset}}">
+<script src="/static/theme.js?v={{.Asset}}"></script>
+<link rel="preload" href="/static/fonts/schibsted-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/static/app.css?v={{.Asset}}">
+{{block "scripts" .}}{{end}}
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/">{{template "mark"}}<span>Private Label Portal</span></a>
+  <div class="spacer"></div>
+  {{- if .Admin}}
+  <span class="who" title="Signed in as admin">{{.Admin.Username}} (admin)</span>
+  <form method="post" action="/logout"><button class="btn quiet small" type="submit">Log out</button></form>
+  {{- else if .GuestEmail}}
+  <span class="who">{{.GuestEmail}}</span>
+  <form method="post" action="/logout"><button class="btn quiet small" type="submit">Log out</button></form>
+  {{- end}}
+  <div class="theme">
+    <button class="theme-btn" id="theme-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="theme-menu">Theme: <span id="theme-label">System</span><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+    <ul class="theme-menu" id="theme-menu" role="menu" hidden>
+      <li role="none"><button type="button" role="menuitemradio" data-theme-choice="system" aria-checked="true">System</button></li>
+      <li role="none"><button type="button" role="menuitemradio" data-theme-choice="dark" aria-checked="false">Dark</button></li>
+      <li role="none"><button type="button" role="menuitemradio" data-theme-choice="light" aria-checked="false">Light</button></li>
+    </ul>
+  </div>
+</header>
+{{- if and .Admin .Tab}}
+<nav class="tabs" aria-label="Admin">
+  <a href="/form"{{if eq .Tab "form"}} aria-current="page"{{end}}>Submission Form</a>
+  <a href="/admin"{{if eq .Tab "panel"}} aria-current="page"{{end}}>Admin Panel</a>
+</nav>
+{{- end}}
+<main id="main">
+{{template "content" .}}
+</main>
+<footer class="footer">Private Label Portal {{.Version}}</footer>
+</body>
+</html>
+{{end}}
+
+{{define "mark"}}<svg viewBox="0 0 32 32" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="16" cy="16" r="9"/><circle cx="16" cy="16" r="3.2"/><path d="M16 1v30M1 16h30"/></g></svg>{{end}}
+
+{{define "flash"}}{{if .Flash}}<p class="flash{{if .FlashError}} error{{end}}" role="{{if .FlashError}}alert{{else}}status{{end}}">{{.Flash}}</p>{{end}}{{end}}
+
+{{define "panelnav"}}
+<nav class="subnav" aria-label="Admin panel sections">
+  <ul>
+    <li><a href="/admin/submissions"{{if eq .Section "submissions"}} aria-current="page"{{end}}>Submission Explorer</a></li>
+    <li><a href="/admin/invites"{{if eq .Section "invites"}} aria-current="page"{{end}}>Invite Codes</a></li>
+    <li><a href="/admin/logs"{{if eq .Section "logs"}} aria-current="page"{{end}}>Action Logs</a></li>
+    <li><a href="/admin/accounts"{{if eq .Section "accounts"}} aria-current="page"{{end}}>Accounts</a></li>
+    <li><a href="/admin/security"{{if eq .Section "security"}} aria-current="page"{{end}}>Security</a></li>
+    <li><a href="/admin/smtp"{{if eq .Section "smtp"}} aria-current="page"{{end}}>Configure SMTP</a></li>
+  </ul>
+</nav>
+{{end}}
+
+{{define "folder-icon"}}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5h4.6l2 2.2h8.4A1.5 1.5 0 0 1 21 8.7v9.8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>{{end}}
+{{define "doc-icon"}}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z M14 3v4h4 M9 12h6 M9 15.5h6 M9 19h4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>{{end}}
+{{define "zip-icon"}}<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6z M14 3v4h4 M11 3v2h2v2h-2v2h2v2h-2 v3 M10 14h3v3h-3z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>{{end}}

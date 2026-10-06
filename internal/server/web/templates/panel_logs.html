@@ -1,0 +1,62 @@
+{{define "scripts"}}<script src="/static/panel.js?v={{.Asset}}" defer></script>{{end}}
+{{define "content"}}
+{{$d := .Data}}
+<div class="panel">
+  {{template "panelnav" .}}
+  <div class="panel-body">
+    {{template "flash" .}}
+    <h1>Action Logs</h1>
+    <p class="lede">Everything admins and clients do: sign-ins (including failed ones), invite code changes, form edits, uploads, submissions and account changes. Times are in the server's time zone.</p>
+
+    <form method="get" action="/admin/logs" class="filters card">
+      <div class="field"><label for="f-from">From</label><input type="datetime-local" id="f-from" name="from" value="{{$d.From}}"></div>
+      <div class="field"><label for="f-to">To</label><input type="datetime-local" id="f-to" name="to" value="{{$d.To}}"></div>
+      <div class="field"><label for="f-kind">Who</label>
+        <select id="f-kind" name="kind">
+          <option value="">Everyone</option>
+          <option value="admin"{{if eq $d.Kind "admin"}} selected{{end}}>Admins</option>
+          <option value="guest"{{if eq $d.Kind "guest"}} selected{{end}}>Clients</option>
+          <option value="system"{{if eq $d.Kind "system"}} selected{{end}}>System</option>
+        </select>
+      </div>
+      <div class="field"><label for="f-actor">User or email</label><input type="search" id="f-actor" name="actor" value="{{$d.Actor}}"></div>
+      <div class="field"><label for="f-action">Action</label>
+        <select id="f-action" name="action">
+          <option value="">All actions</option>
+          {{range $d.Actions}}<option{{if eq . $d.Action}} selected{{end}}>{{.}}</option>{{end}}
+        </select>
+      </div>
+      <div class="field"><label for="f-text">Details or IP contain</label><input type="search" id="f-text" name="text" value="{{$d.Text}}"></div>
+      <div class="buttons"><button class="btn primary" type="submit">Filter</button><a class="btn quiet" href="/admin/logs">Clear</a></div>
+    </form>
+
+    <p class="muted">{{$d.Total}} entr{{if eq $d.Total 1}}y{{else}}ies{{end}} · <a href="{{$d.CSVURL}}">Download as CSV</a></p>
+    {{if $d.Entries}}
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Time</th><th>Who</th><th>User</th><th>Action</th><th>Details</th><th>IP</th></tr></thead>
+        <tbody>
+        {{range $d.Entries}}
+          <tr>
+            <td class="num">{{when .At}}</td>
+            <td><span class="chip {{.ActorKind}}">{{if eq .ActorKind "guest"}}client{{else}}{{.ActorKind}}{{end}}</span></td>
+            <td class="detail">{{.Actor}}</td>
+            <td class="nowrap">{{.Action}}</td>
+            <td class="detail">{{.Detail}}</td>
+            <td class="num muted">{{.IP}}</td>
+          </tr>
+        {{end}}
+        </tbody>
+      </table>
+    </div>
+    <div class="pager">
+      {{if $d.PrevURL}}<a class="btn small" href="{{$d.PrevURL}}">Newer</a>{{end}}
+      <span>Page {{$d.Page}} of {{$d.Pages}}</span>
+      {{if $d.NextURL}}<a class="btn small" href="{{$d.NextURL}}">Older</a>{{end}}
+    </div>
+    {{else}}
+    <div class="card empty">No log entries match these filters.</div>
+    {{end}}
+  </div>
+</div>
+{{end}}

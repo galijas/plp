@@ -1,0 +1,31 @@
+{{define "scripts"}}<script src="/static/panel.js?v={{.Asset}}" defer></script>{{end}}
+{{define "content"}}
+<div class="panel">
+  {{template "panelnav" .}}
+  <div class="panel-body">
+    {{template "flash" .}}
+    <h1>Security</h1>
+    <p class="lede">Your account: {{.Admin.Username}}.</p>
+
+    <section class="card" aria-labelledby="pw-h" data-w="560">
+      <h2 id="pw-h" class="flush-top">Change your password</h2>
+      <form method="post" action="/admin/security/password">
+        <input type="text" name="username" value="{{.Admin.Username}}" autocomplete="username" hidden>
+        <div class="field"><label for="cur">Current password</label><input type="password" id="cur" name="current" autocomplete="current-password" required maxlength="72"></div>
+        <div class="field"><label for="new">New password <span class="hint">(12 to 72 characters)</span></label><input type="password" id="new" name="new" autocomplete="new-password" required minlength="12" maxlength="72"></div>
+        <div class="field"><label for="confirm">Repeat the new password</label><input type="password" id="confirm" name="confirm" autocomplete="new-password" required minlength="12" maxlength="72"></div>
+        <button class="btn primary" type="submit">Change password</button>
+        <p class="muted flush-bottom">Your other sessions are signed out when the password changes.</p>
+      </form>
+    </section>
+
+    <section class="card" aria-labelledby="em-h" data-w="560">
+      <h2 id="em-h" class="flush-top">Notification email</h2>
+      <form method="post" action="/admin/security/email">
+        <div class="field"><label for="own-email">Email for new-submission notifications</label><input type="email" id="own-email" name="email" value="{{.Admin.Email}}" maxlength="254" placeholder="Leave empty for no notifications"></div>
+        <button class="btn" type="submit">Save email</button>
+      </form>
+    </section>
+  </div>
+</div>
+{{end}}

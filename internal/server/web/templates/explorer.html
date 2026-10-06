@@ -1,0 +1,35 @@
+{{define "content"}}
+{{$d := .Data}}
+<div class="explorer">
+  {{template "flash" .}}
+  <h1>Submission Explorer</h1>
+  <p class="lede">{{$d.Total}} submission folder{{if ne $d.Total 1}}s{{end}}{{if or $d.Query $d.From $d.To}} match the search{{end}}. Newest first.</p>
+
+  <form method="get" action="/explorer" class="filters">
+    <div class="field" data-wide><label for="q">Search email, company, invite code or folder</label><input type="search" id="q" name="q" value="{{$d.Query}}"></div>
+    <div class="field"><label for="from">Submitted from</label><input type="date" id="from" name="from" value="{{$d.From}}"></div>
+    <div class="field"><label for="to">Submitted to</label><input type="date" id="to" name="to" value="{{$d.To}}"></div>
+    <div class="buttons"><button class="btn primary" type="submit">Search</button><a class="btn quiet" href="/explorer">Clear</a></div>
+  </form>
+
+  {{if $d.Items}}
+  <ul class="folders">
+    {{range $d.Items}}
+    <li><a href="/explorer/{{.ID}}">
+      {{template "folder-icon"}}
+      <span class="fname">{{.Folder}}</span>
+      <span class="fmeta">{{if .Label}}{{.Label}} · {{end}}code {{.InviteCode}}</span>
+      <span class="fside">{{.FilesCount}} file{{if ne .FilesCount 1}}s{{end}}<br>{{bytes .FilesBytes}}</span>
+    </a></li>
+    {{end}}
+  </ul>
+  <div class="pager">
+    {{if $d.PrevURL}}<a class="btn small" href="{{$d.PrevURL}}">Newer</a>{{end}}
+    <span>Page {{$d.Page}} of {{$d.Pages}}</span>
+    {{if $d.NextURL}}<a class="btn small" href="{{$d.NextURL}}">Older</a>{{end}}
+  </div>
+  {{else}}
+  <div class="empty">{{if or $d.Query $d.From $d.To}}No folders match this search. <a href="/explorer">Show all submissions</a>{{else}}No submissions yet. They appear here as soon as a client submits the form.{{end}}</div>
+  {{end}}
+</div>
+{{end}}

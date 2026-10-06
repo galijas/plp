@@ -1,0 +1,141 @@
+{{define "scripts"}}<script src="/static/panel.js?v={{.Asset}}" defer></script>{{end}}
+{{define "content"}}
+{{$d := .Data}}
+<div class="panel">
+  {{template "panelnav" .}}
+  <div class="panel-body">
+    {{template "flash" .}}
+    <h1>Invite Codes</h1>
+    <p class="lede">Clients sign in with their email and an invite code. A code can be tied to one email or accept any email, and stops working when it expires, is revoked, or (for single-use codes) after one submission. Send clients the invite link: it fills in the code and email for them.</p>
+
+    <section class="card" aria-labelledby="new-code">
+      <h2 id="new-code" class="flush-top">Create an invite code</h2>
+      <form method="post" action="/admin/invites" class="invite-form">
+        <div class="field">
+          <label for="inv-email">Client email</label>
+          <input type="email" id="inv-email" name="email" maxlength="254" placeholder="name@client.com" required data-email-input>
+          <label class="check"><input type="checkbox" name="anyEmail" value="1" data-any-email> <span>No specific email: any email address can use this code</span></label>
+        </div>
+        <div class="field">
+          <label for="inv-code">Invite code</label>
+          <div class="code-input">
+            <input type="text" id="inv-code" name="code" value="{{$d.NewCode}}" maxlength="64" spellcheck="false" autocomplete="off" pattern="[A-Za-z0-9][A-Za-z0-9_\-]{5,63}">
+            <button class="btn" type="button" data-generate="inv-code">Generate</button>
+          </div>
+          <span class="hint">Use the generated code or type your own: 6 to 64 letters, digits, dashes or underscores. Codes are not case-sensitive.</span>
+        </div>
+        <div class="field">
+          <span id="uses-l" class="label">Uses</span>
+          <div class="radio-row" role="radiogroup" aria-labelledby="uses-l">
+            <label><input type="radio" name="uses" value="single" checked> Single use</label>
+            <label><input type="radio" name="uses" value="unlimited"> Unlimited until it expires</label>
+          </div>
+        </div>
+        <div class="field">
+          <span id="exp-l" class="label">Valid for</span>
+          <div class="radio-row" role="radiogroup" aria-labelledby="exp-l">
+            {{range $d.Expiry}}<label><input type="radio" name="expiry" value="{{.Value}}"{{if eq .Value "1m"}} checked{{end}}> {{.Label}}</label>{{end}}
+          </div>
+        </div>
+        <div class="field">
+          <label for="inv-label">Note <span class="hint">(optional, only admins see it)</span></label>
+          <input type="text" id="inv-label" name="label" maxlength="200" placeholder="Client or ticket number">
+        </div>
+        {{if $d.PrefillItems}}
+        <details class="more">
+          <summary>Pre-fill answers (optional)</summary>
+          <p class="muted flush-top">Answers entered here appear in the client's form when they first open it. They can still change them.</p>
+          {{range $d.PrefillItems}}
+          <div class="field">
+            <label for="pf-{{.ID}}">{{.Title}}</label>
+            <input type="text" id="pf-{{.ID}}" name="prefill_{{.ID}}" maxlength="1000">
+          </div>
+          {{end}}
+        </details>
+        {{end}}
+        <button class="btn primary" type="submit">Create invite code</button>
+      </form>
+    </section>
+
+    <h2>All codes</h2>
+    {{if $d.Rows}}
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Code</th><th>For</th><th>Note</th><th>Uses</th><th>Expires</th><th>Status</th><th><span class="visually-hidden">Actions</span></th></tr></thead>
+        <tbody>
+        {{range $d.Rows}}
+          <tr{{if eq .ID $d.Highlight}} class="hl"{{end}} id="invite-{{.ID}}">
+            <td class="code-cell">{{.Code}}</td>
+            <td>{{if .Email}}{{.Email}}{{else}}<span class="muted">Any email</span>{{end}}</td>
+            <td class="detail">{{.Label}}</td>
+            <td class="num">{{.Uses}} {{if eq .MaxUses 1}}of 1{{else}}<span class="muted">(unlimited)</span>{{end}}{{if .Submissions}}<br><a class="muted" href="/explorer?q={{.Code}}" target="_blank" rel="noopener">{{.Submissions}} submission{{if ne .Submissions 1}}s{{end}}</a>{{end}}</td>
+            <td class="nowrap">{{if .ExpiresAt}}{{whenp .ExpiresAt}}{{else}}<span class="muted">Never</span>{{end}}</td>
+            <td><span class="chip {{.Status}}">{{if eq .Status "used"}}used up{{else}}{{.Status}}{{end}}</span></td>
+            <td>
+              <div class="actions">
+                <button class="btn small" type="button" data-copy="{{inviteLink .Code .Email}}">Copy link</button>
+                <button class="btn small" type="button" data-open="edit-{{.ID}}">Edit</button>
+                {{if .RevokedAt}}
+                <form method="post" action="/admin/invites/{{.ID}}/restore"><button class="btn small" type="submit">Restore</button></form>
+                {{else}}
+                <form method="post" action="/admin/invites/{{.ID}}/revoke" data-confirm="Revoke {{.Code}}? Anyone signed in with it is signed out. Their draft is kept, and you can restore the code later."><button class="btn small danger" type="submit">Revoke</button></form>
+                {{end}}
+                <form method="post" action="/admin/invites/{{.ID}}/delete" data-confirm="Delete {{.Code}}? Drafts and unsent files made with it are deleted. Its submissions are kept."><button class="btn small quiet" type="submit">Delete</button></form>
+              </div>
+              <dialog id="edit-{{.ID}}" aria-labelledby="edit-{{.ID}}-t">
+                <form method="post" action="/admin/invites/{{.ID}}" class="invite-form">
+                  <div class="dlg-head"><h2 id="edit-{{.ID}}-t">Edit <span class="code">{{.Code}}</span></h2><button class="btn quiet small" type="button" data-close>Close</button></div>
+                  <div class="dlg-body">
+                    <div class="field">
+                      <label for="e-email-{{.ID}}">Client email</label>
+                      <input type="email" id="e-email-{{.ID}}" name="email" maxlength="254" value="{{.Email}}" required data-email-input>
+                      <label class="check"><input type="checkbox" name="anyEmail" value="1" data-any-email{{if not .Email}} checked{{end}}> <span>No specific email: any email address can use this code</span></label>
+                    </div>
+                    <div class="field">
+                      <span class="label">Uses</span>
+                      <div class="radio-row">
+                        <label><input type="radio" name="uses" value="single"{{if eq .MaxUses 1}} checked{{end}}> Single use</label>
+                        <label><input type="radio" name="uses" value="unlimited"{{if ne .MaxUses 1}} checked{{end}}> Unlimited until it expires</label>
+                      </div>
+                      {{if and (eq .MaxUses 1) (ge .Uses 1)}}<span class="hint">This code was used. Switch to unlimited to let the client submit again.</span>{{end}}
+                    </div>
+                    <div class="field">
+                      <label for="e-exp-{{.ID}}">Expiry</label>
+                      <select id="e-exp-{{.ID}}" name="expiry">
+                        <option value="keep" selected>Keep: {{if .ExpiresAt}}expires {{whenp .ExpiresAt}}{{else}}no expiry{{end}}</option>
+                        {{range $d.Expiry}}<option value="{{.Value}}">{{if eq .Value "never"}}No expiry{{else}}{{.Label}} from now{{end}}</option>{{end}}
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label for="e-label-{{.ID}}">Note</label>
+                      <input type="text" id="e-label-{{.ID}}" name="label" maxlength="200" value="{{.Label}}">
+                    </div>
+                    {{$pf := .Prefill}}{{$rid := .ID}}
+                    {{if $d.PrefillItems}}
+                    <details class="more"{{if $pf}} open{{end}}>
+                      <summary>Pre-fill answers</summary>
+                      <p class="muted flush-top">Used when a client opens the form for the first time. Drafts that already exist keep their answers.</p>
+                      {{range $d.PrefillItems}}
+                      <div class="field">
+                        <label for="e-pf-{{$rid}}-{{.ID}}">{{.Title}}</label>
+                        <input type="text" id="e-pf-{{$rid}}-{{.ID}}" name="prefill_{{.ID}}" maxlength="1000" value="{{index $pf .ID}}">
+                      </div>
+                      {{end}}
+                    </details>
+                    {{end}}
+                  </div>
+                  <div class="dlg-foot"><button class="btn" type="button" data-close>Cancel</button><button class="btn primary" type="submit">Save changes</button></div>
+                </form>
+              </dialog>
+            </td>
+          </tr>
+        {{end}}
+        </tbody>
+      </table>
+    </div>
+    {{else}}
+    <div class="card empty">No invite codes yet. Create one above to invite a client.</div>
+    {{end}}
+  </div>
+</div>
+{{end}}

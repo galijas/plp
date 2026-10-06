@@ -1,0 +1,52 @@
+{{define "scripts"}}<script src="/static/panel.js?v={{.Asset}}" defer></script>{{end}}
+{{define "content"}}
+{{$d := .Data}}{{$c := $d.Config}}
+<div class="panel">
+  {{template "panelnav" .}}
+  <div class="panel-body">
+    {{template "flash" .}}
+    <h1>Configure SMTP</h1>
+    <p class="lede">When a client submits the form, every admin with a notification email gets a short message with the company name, the client's email and a link to the submission. Answers are never put in the email, since they can contain secrets.</p>
+
+    <form method="post" action="/admin/smtp" class="card" data-w="720">
+      <label class="check" data-sp="18"><input type="checkbox" name="enabled" value="1"{{if $c.Enabled}} checked{{end}}> <span><strong>Send notification emails</strong></span></label>
+      <div class="field-row">
+        <div class="field"><label for="s-host">SMTP server</label><input type="text" id="s-host" name="host" value="{{$c.Host}}" placeholder="smtp.example.com" autocomplete="off"></div>
+        <div class="field"><label for="s-port">Port</label><input type="number" id="s-port" name="port" value="{{$c.Port}}" min="1" max="65535"></div>
+      </div>
+      <div class="field">
+        <span class="label">Connection security</span>
+        <div class="radio-row">
+          <label><input type="radio" name="security" value="starttls"{{if eq $c.Security "starttls"}} checked{{end}} data-port="587"> STARTTLS (port 587)</label>
+          <label><input type="radio" name="security" value="tls"{{if eq $c.Security "tls"}} checked{{end}} data-port="465"> TLS (port 465)</label>
+          <label><input type="radio" name="security" value="none"{{if eq $c.Security "none"}} checked{{end}} data-port="25"> None (trusted relay only)</label>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label for="s-user">Username <span class="hint">(empty: no login)</span></label><input type="text" id="s-user" name="username" value="{{$c.Username}}" autocomplete="off"></div>
+        <div class="field"><label for="s-pass">Password</label><input type="password" id="s-pass" name="password" autocomplete="new-password" placeholder="{{if $d.HasPassword}}Saved; leave empty to keep it{{end}}">
+          {{if $d.HasPassword}}<label class="check"><input type="checkbox" name="clearPassword" value="1"> <span class="hint">Remove the saved password</span></label>{{end}}
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label for="s-from">Sender address</label><input type="email" id="s-from" name="from" value="{{$c.From}}" placeholder="portal@example.com"></div>
+        <div class="field"><label for="s-name">Sender name</label><input type="text" id="s-name" name="fromName" value="{{$c.FromName}}" maxlength="100"></div>
+      </div>
+      <button class="btn primary" type="submit">Save SMTP settings</button>
+    </form>
+
+    <section class="card" data-w="720">
+      <h2 class="flush-top">Test and recipients</h2>
+      <form method="post" action="/admin/smtp/test" data-sp="16">
+        <button class="btn" type="submit"{{if not .Admin.Email}} disabled{{end}}>Send a test email to {{if .Admin.Email}}{{.Admin.Email}}{{else}}me{{end}}</button>
+        {{if not .Admin.Email}}<p class="muted">Add your email under <a href="/admin/security">Security</a> to send a test.</p>{{end}}
+      </form>
+      <p data-sp="6">Notifications go to:</p>
+      <ul class="flush-top">
+        {{range $d.Admins}}<li>{{.Username}}: {{if .Email}}{{.Email}}{{else}}<span class="muted">no email, not notified</span>{{end}}</li>{{end}}
+      </ul>
+      <p class="muted flush-bottom">Change addresses in <a href="/admin/accounts">Accounts</a>.</p>
+    </section>
+  </div>
+</div>
+{{end}}

@@ -1,0 +1,43 @@
+{{define "scripts"}}<script src="/static/login.js?v={{.Asset}}" defer></script>{{end}}
+{{define "content"}}
+{{$v := .Data}}
+<div class="signin-wrap">
+  <section class="signin crop" aria-labelledby="signin-title">
+    <div id="guest-panel"{{if and $v (eq $v.Mode "admin")}} hidden{{end}}>
+      <h1 id="signin-title">Private Label Portal</h1>
+      <p class="lede">Sign in with your email and the invite code from your Bicom Systems project ticket to fill in the branding form.</p>
+      {{if and $v (eq $v.Mode "guest") $v.Error}}<p class="flash error" role="alert">{{$v.Error}}</p>{{end}}
+      <form method="post" action="/login/guest" id="guest-form">
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" autocomplete="email" required maxlength="254" value="{{if $v}}{{$v.Email}}{{end}}">
+        </div>
+        <div class="field">
+          <label for="code">Invite code</label>
+          <input type="text" id="code" name="code" autocomplete="off" autocapitalize="characters" spellcheck="false" required maxlength="64" value="{{if $v}}{{$v.Code}}{{end}}">
+        </div>
+        <button class="btn primary big" type="submit">Continue to the form</button>
+      </form>
+      <p class="alt">Bicom Systems staff: <button type="button" class="linklike" id="show-admin">log in as admin</button></p>
+    </div>
+
+    <div id="admin-panel"{{if not (and $v (eq $v.Mode "admin"))}} hidden{{end}}>
+      <h1>Admin login</h1>
+      <p class="lede">For Bicom Systems staff who manage the form, invite codes and submissions.</p>
+      {{if and $v (eq $v.Mode "admin") $v.Error}}<p class="flash error" role="alert">{{$v.Error}}</p>{{end}}
+      <form method="post" action="/login/admin">
+        <div class="field">
+          <label for="username">Username</label>
+          <input type="text" id="username" name="username" autocomplete="username" required maxlength="40" value="{{if $v}}{{$v.Username}}{{end}}">
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" autocomplete="current-password" required maxlength="72">
+        </div>
+        <button class="btn primary big" type="submit">Log in</button>
+      </form>
+      <p class="alt"><button type="button" class="linklike" id="show-guest">Back to client sign-in</button></p>
+    </div>
+  </section>
+</div>
+{{end}}

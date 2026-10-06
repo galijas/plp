@@ -1,0 +1,69 @@
+{{define "scripts"}}<script src="/static/panel.js?v={{.Asset}}" defer></script>{{end}}
+{{define "content"}}
+{{$d := .Data}}{{$s := $d.Sub}}
+<div class="explorer">
+  {{template "flash" .}}
+  <p class="crumbs"><a href="/explorer">Submission Explorer</a> /</p>
+  <h1 class="folder-title">{{$s.Folder}}</h1>
+  <p class="lede">{{if $s.Label}}{{$s.Label}} · {{end}}submitted {{whenFull $s.SubmittedAt}} with code <span class="code">{{$s.InviteCode}}</span></p>
+
+  <div class="filelist">
+    <div class="fileitem">
+      {{template "doc-icon"}}
+      <span class="fname">{{$d.AnswersTxt}}</span>
+      <span class="fmeta">Form answers · text file, also available as PDF</span>
+      <div class="actions">
+        <a class="btn small" href="#answers">View</a>
+        <a class="btn small" href="/explorer/{{$s.ID}}/answers.pdf?view=1" target="_blank" rel="noopener">Open PDF</a>
+        <a class="btn small" href="/explorer/{{$s.ID}}/answers.pdf" download="{{$d.AnswersPDF}}">Download PDF</a>
+        <a class="btn small" href="/explorer/{{$s.ID}}/answers.txt" download="{{$d.AnswersTxt}}">Download .txt</a>
+      </div>
+    </div>
+    {{if gt $s.FilesCount 0}}
+    <div class="fileitem">
+      {{template "zip-icon"}}
+      <span class="fname">{{$d.FilesZip}}</span>
+      <span class="fmeta">Uploaded files · {{$s.FilesCount}} file{{if ne $s.FilesCount 1}}s{{end}}, {{bytes $s.FilesBytes}}</span>
+      <div class="actions">
+        {{if $d.ZipMissing}}<span class="error-text">The zip file is missing on the server.</span>{{else}}<a class="btn small primary" href="/explorer/{{$s.ID}}/files.zip" download="{{$d.FilesZip}}">Download zip</a>{{end}}
+      </div>
+      {{if $d.ZipEntries}}
+      <ul class="zip-list">
+        {{range $d.ZipEntries}}<li><span>{{.Name}}</span><span class="muted num">{{bytes .Size}}</span></li>{{end}}
+      </ul>
+      {{end}}
+    </div>
+    {{else}}
+    <p class="muted">The client uploaded no files with this submission.</p>
+    {{end}}
+  </div>
+
+  <article class="answers" id="answers" aria-label="Form answers">
+    <h2>{{$s.Snapshot.Title}}</h2>
+    <dl class="meta">
+      <dt>Submitted by</dt><dd>{{$s.Email}}</dd>
+      <dt>Submitted at</dt><dd>{{whenFull $s.SubmittedAt}}</dd>
+      <dt>Invite code</dt><dd>{{$s.InviteCode}}</dd>
+      <dt>Files</dt><dd>{{$s.FilesCount}} ({{bytes $s.FilesBytes}})</dd>
+    </dl>
+    {{range $s.Snapshot.Sections}}
+    <h3>{{.Title}}</h3>
+    <dl>
+      {{range .Items}}
+      <dt>{{.Title}}</dt>
+      {{if .Answer}}{{range .Answer}}<dd>{{.}}</dd>{{end}}{{else}}<dd class="none">No answer</dd>{{end}}
+      {{end}}
+    </dl>
+    {{end}}
+  </article>
+
+  <section class="danger-zone" aria-labelledby="del-h">
+    <h2 id="del-h">Delete this submission</h2>
+    <p class="muted">The folder, its answers and its uploaded files are removed permanently. Type the client's email ({{$s.Email}}) to confirm.</p>
+    <form method="post" action="/explorer/{{$s.ID}}/delete">
+      <input type="text" name="confirm" aria-label="Client email to confirm" autocomplete="off" required>
+      <button class="btn danger" type="submit">Delete submission</button>
+    </form>
+  </section>
+</div>
+{{end}}

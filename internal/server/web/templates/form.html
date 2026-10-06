@@ -1,0 +1,14 @@
+{{define "scripts"}}<script src="/static/form.js?v={{.Asset}}" defer></script>{{end}}
+{{define "content"}}
+<div class="form-layout" id="app" data-role="{{if .Admin}}admin{{else}}guest{{end}}">
+  <aside class="rail" aria-label="Form sections">
+    <ol id="rail-list"></ol>
+    <p class="status" id="save-status" role="status" aria-live="polite"></p>
+  </aside>
+  <div>
+    {{template "flash" .}}
+    <div id="form-root"><p class="muted">Loading the form…</p></div>
+    <noscript><p class="flash error">This form needs JavaScript. Enable it in your browser and reload the page.</p></noscript>
+  </div>
+</div>
+{{end}}

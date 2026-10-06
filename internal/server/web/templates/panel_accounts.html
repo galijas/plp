@@ -1,0 +1,62 @@
+{{define "scripts"}}<script src="/static/panel.js?v={{.Asset}}" defer></script>{{end}}
+{{define "content"}}
+{{$d := .Data}}
+<div class="panel">
+  {{template "panelnav" .}}
+  <div class="panel-body">
+    {{template "flash" .}}
+    <h1>Accounts</h1>
+    <p class="lede">Admin accounts can edit the form, manage invite codes and accounts, and open submissions. Admins with an email address get an email for every new submission when SMTP is configured.</p>
+
+    {{if $d.NewPassword}}
+    <div class="card" role="status" data-hl>
+      <h2 class="flush-top">Password for {{$d.NewUser}}</h2>
+      <p>Give this password to {{$d.NewUser}} over a secure channel. It is shown only once; they can change it under Security.</p>
+      <div class="secret" id="new-pw">{{$d.NewPassword}}</div>
+      <p><button class="btn small" type="button" data-copy="{{$d.NewPassword}}">Copy password</button></p>
+    </div>
+    {{end}}
+
+    <section class="card" aria-labelledby="add-admin">
+      <h2 id="add-admin" class="flush-top">Add an admin</h2>
+      <form method="post" action="/admin/accounts">
+        <div class="field-row">
+          <div class="field"><label for="a-user">Username</label><input type="text" id="a-user" name="username" required maxlength="40" pattern="[A-Za-z0-9._\-]{2,40}" autocomplete="off"></div>
+          <div class="field"><label for="a-email">Email <span class="hint">(for notifications, optional)</span></label><input type="email" id="a-email" name="email" maxlength="254"></div>
+        </div>
+        <button class="btn primary" type="submit">Add admin and generate password</button>
+      </form>
+    </section>
+
+    <h2>Admins</h2>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Username</th><th>Notification email</th><th>Created</th><th>Last login</th><th><span class="visually-hidden">Actions</span></th></tr></thead>
+        <tbody>
+        {{range $d.Admins}}
+          <tr>
+            <td><strong>{{.Username}}</strong>{{if eq .ID $.Admin.ID}} <span class="muted">(you)</span>{{end}}</td>
+            <td>
+              <form method="post" action="/admin/accounts/{{.ID}}/email" class="code-input">
+                <input type="email" name="email" value="{{.Email}}" maxlength="254" aria-label="Notification email of {{.Username}}" placeholder="No email">
+                <button class="btn small" type="submit">Save</button>
+              </form>
+            </td>
+            <td class="num">{{when .CreatedAt}}{{if .CreatedBy}}<br><span class="muted">by {{.CreatedBy}}</span>{{end}}</td>
+            <td class="num">{{if .LastLoginAt}}{{whenp .LastLoginAt}}{{else}}<span class="muted">Never</span>{{end}}</td>
+            <td>
+              {{if ne .ID $.Admin.ID}}
+              <div class="actions">
+                <form method="post" action="/admin/accounts/{{.ID}}/reset" data-confirm="Reset the password of {{.Username}}? Their current password stops working and they are signed out."><button class="btn small" type="submit">Reset password</button></form>
+                <form method="post" action="/admin/accounts/{{.ID}}/delete" data-confirm="Delete the admin account {{.Username}}?"><button class="btn small danger" type="submit">Delete</button></form>
+              </div>
+              {{end}}
+            </td>
+          </tr>
+        {{end}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{{end}}
