@@ -36,7 +36,7 @@ cd "$(dirname "$0")"
 # --- Packages. A minimal Ubuntu image may lack ca-certificates, which
 # breaks every HTTPS call including Go's module downloads.
 NEED=()
-for p in ca-certificates curl git; do dpkg -s "$p" >/dev/null 2>&1 || NEED+=("$p"); done
+for p in ca-certificates curl git nftables; do dpkg -s "$p" >/dev/null 2>&1 || NEED+=("$p"); done
 if [ ${#NEED[@]} -gt 0 ]; then
   log "installing: ${NEED[*]}"
   apt-get update -qq
@@ -49,6 +49,8 @@ PLP_DOMAIN=${PLP_DOMAIN:-}
 PLP_EMAIL=${PLP_EMAIL:-}
 PLP_TIMEZONE=${PLP_TIMEZONE:-Europe/Sarajevo}
 PLP_MAX_MB=${PLP_MAX_MB:-3072}
+PLP_FIREWALL=${PLP_FIREWALL:-y}
+PLP_SSH_PORTS=${PLP_SSH_PORTS:-}
 if [ -f "$CONF" ]; then
   # shellcheck disable=SC1090
   . "$CONF"
@@ -75,6 +77,30 @@ while :; do
   echo "  Unknown time zone. Examples: Europe/Sarajevo, America/Chicago, UTC."
 done
 
+# Host firewall questions (applied further down). The SSH port defaults to
+# what sshd listens on, so the firewall never locks out the admin.
+DETECTED_SSH=$(sshd -T 2>/dev/null | awk '$1=="port"{print $2}' | sort -un | tr '\n' ' ' | sed 's/ $//')
+[ -n "$PLP_SSH_PORTS" ] || PLP_SSH_PORTS=${DETECTED_SSH:-22}
+echo
+echo "Host firewall (nftables): allow inbound TCP only to SSH, 80 and 443, drop everything else."
+if confirm "Set up the host firewall?" "$PLP_FIREWALL"; then
+  PLP_FIREWALL=y
+  while :; do
+    ask PLP_SSH_PORTS "SSH port(s) to allow, separated by spaces (sshd listens on: ${DETECTED_SSH:-unknown})" "$PLP_SSH_PORTS"
+    ok=1
+    for p in $PLP_SSH_PORTS; do [[ "$p" =~ ^[0-9]+$ ]] && [ "$p" -ge 1 ] && [ "$p" -le 65535 ] || ok=0; done
+    [ -n "$PLP_SSH_PORTS" ] && [ $ok -eq 1 ] && break
+    echo "  Enter one or more port numbers, for example: 2020"
+  done
+  CUR_PORT=$(echo "${SSH_CONNECTION:-}" | awk '{print $4}')
+  if [ -n "$CUR_PORT" ] && [[ " $PLP_SSH_PORTS " != *" $CUR_PORT "* ]]; then
+    warn "you are connected over SSH port $CUR_PORT, which is not in the list ($PLP_SSH_PORTS)."
+    confirm "Continue anyway? New SSH connections on port $CUR_PORT will be blocked." n || exit 1
+  fi
+else
+  PLP_FIREWALL=n
+fi
+
 # Check the A record against this server's addresses. Behind 1:1 NAT the
 # public address isn't configured locally, so this only warns.
 RESOLVED=$(getent ahostsv4 "$PLP_DOMAIN" | awk '{print $1}' | sort -u | tr '\n' ' ' || true)
@@ -98,12 +124,120 @@ PLP_DOMAIN=$PLP_DOMAIN
 PLP_EMAIL=$PLP_EMAIL
 PLP_TIMEZONE=$PLP_TIMEZONE
 PLP_MAX_MB=$PLP_MAX_MB
+PLP_FIREWALL=$PLP_FIREWALL
+PLP_SSH_PORTS="$PLP_SSH_PORTS"
 EOF
 chmod 644 "$CONF"
 log "configuration saved to $CONF"
 
-# --- No host firewall changes: the SERVERware platform firewall in front of
-# this VPS controls access. Ports 80 and 443 must be allowed there.
+# --- Host firewall. nftables only, no ufw: ufw needs iptables LOG/REJECT
+# targets that the SERVERware VPS kernel lacks (and it can't load modules),
+# so "ufw enable" fails there. Native nftables rules need neither. The rules
+# live in their own table, so other tables (such as empty ufw leftovers) are
+# untouched. Outbound traffic is not filtered.
+FW_TABLE=plportal_fw
+FW_FILE=$CONF_DIR/firewall.nft
+FW_UNIT=/etc/systemd/system/$APP-firewall.service
+
+fw_supported() {
+  command -v nft >/dev/null 2>&1 || return 1
+  nft add table inet plp_probe 2>/dev/null || return 1
+  local rc=0
+  { nft add chain inet plp_probe c '{ type filter hook input priority 0; policy accept; }' &&
+    nft add rule inet plp_probe c ct state established,related accept &&
+    nft add rule inet plp_probe c meta l4proto '{ icmp, ipv6-icmp }' accept &&
+    nft add rule inet plp_probe c tcp dport '{ 80, 443 }' accept; } 2>/dev/null || rc=1
+  nft delete table inet plp_probe 2>/dev/null
+  return $rc
+}
+
+fw_rules() { # prints the ruleset for the given SSH ports
+  local ports
+  ports=$(echo "$1" 80 443 | tr ' ' '\n' | sort -un | paste -sd, - | sed 's/,/, /g')
+  cat <<NFT
+# Managed by the Private Label Portal install.sh; edits are overwritten.
+# Inbound: SSH, HTTP (80) and HTTPS (443) only. Outbound is not filtered.
+table inet $FW_TABLE
+delete table inet $FW_TABLE
+table inet $FW_TABLE {
+  chain input {
+    type filter hook input priority 0; policy drop;
+    iif lo accept
+    ct state established,related accept
+    ct state invalid drop
+    meta l4proto { icmp, ipv6-icmp } accept
+    udp sport 67 udp dport 68 accept
+    udp sport 547 udp dport 546 accept
+    tcp dport { $ports } accept
+  }
+}
+NFT
+}
+
+fw_remove() {
+  systemctl disable --now "$APP-firewall" >/dev/null 2>&1 || true
+  nft delete table inet "$FW_TABLE" 2>/dev/null || true
+  rm -f "$FW_UNIT" "$FW_FILE"
+  systemctl daemon-reload
+}
+
+if [ "$PLP_FIREWALL" = y ]; then
+  if ! fw_supported; then
+    warn "nftables is not usable on this kernel; no host firewall was set up."
+    echo "  Restrict inbound traffic to TCP $PLP_SSH_PORTS, 80 and 443 in the SERVERware firewall."
+  else
+    NEW_RULES=$(fw_rules "$PLP_SSH_PORTS")
+    OLD_RULES=$(cat "$FW_FILE" 2>/dev/null || true)
+    TMP_RULES=$(mktemp)
+    echo "$NEW_RULES" > "$TMP_RULES"
+    nft -c -f "$TMP_RULES" || { rm -f "$TMP_RULES"; die "the generated firewall rules failed nft's check"; }
+    install -m 644 "$TMP_RULES" "$FW_FILE"
+    rm -f "$TMP_RULES"
+    cat > "$FW_UNIT" <<UNIT
+[Unit]
+Description=Private Label Portal firewall (nftables: SSH, 80, 443 inbound only)
+Wants=network-pre.target
+Before=network-pre.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/sbin/nft -f $FW_FILE
+ExecStop=/usr/sbin/nft delete table inet $FW_TABLE
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+    systemctl daemon-reload
+    systemctl enable "$APP-firewall" >/dev/null 2>&1
+    systemctl restart "$APP-firewall"
+    if [ "$NEW_RULES" = "$OLD_RULES" ]; then
+      log "host firewall unchanged: inbound TCP $PLP_SSH_PORTS, 80, 443 only"
+    else
+      # New or changed rules: keep them only if a new SSH login still works.
+      # This session stays open either way (established connections pass).
+      echo
+      log "host firewall active: inbound TCP $PLP_SSH_PORTS, 80, 443 only"
+      echo "  Open a NEW SSH session to this server now and check that you can log in."
+      ANS=""
+      read -r -t 180 -p "  Type yes within 3 minutes if the new session works (anything else rolls back): " ANS || true
+      echo
+      if [ "$ANS" = yes ]; then
+        log "host firewall kept (unit $APP-firewall, rules $FW_FILE)"
+      elif [ -n "$OLD_RULES" ]; then
+        echo "$OLD_RULES" > "$FW_FILE"
+        systemctl restart "$APP-firewall"
+        warn "rolled back to the previous firewall rules. Check the SSH port(s) and run install.sh again."
+      else
+        fw_remove
+        warn "firewall removed again (not confirmed). Check the SSH port(s) and run install.sh again."
+      fi
+    fi
+  fi
+elif [ -f "$FW_UNIT" ]; then
+  fw_remove
+  log "host firewall removed (as chosen); inbound filtering is left to the SERVERware firewall"
+fi
 
 
 # --- Go toolchain.

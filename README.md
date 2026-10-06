@@ -41,17 +41,28 @@ so later form edits never change them.
 ## Install (Ubuntu 24.04)
 
 1. Create a DNS A record for the server, and allow ports 80 and 443 to it in
-   the SERVERware firewall. `install.sh` does not change the host firewall.
+   the SERVERware firewall.
 2. On the server:
    ```
    git clone <repo url> plportal && cd plportal
    sudo ./install.sh
    ```
    The script installs Go and the other dependencies, asks for the DNS name,
-   a Let's Encrypt email and the time zone, builds the binary, sets up systemd services, gets the certificate and
+   a Let's Encrypt email and the time zone, offers a host firewall (below),
+   builds the binary, sets up systemd services, gets the certificate and
    creates the first admin, printing its password once.
 3. Log in at `https://<host>/#admin`, set up SMTP under Admin Panel >
    Configure SMTP, and create invite codes.
+
+**Host firewall:** `install.sh` offers an nftables firewall that lets in only
+TCP to the SSH port(s), 80 and 443 (plus ping and DHCP replies) and drops
+everything else; outbound traffic is not filtered. It does not use ufw:
+ufw needs iptables LOG/REJECT targets that the SERVERware VPS kernel lacks.
+The SSH port defaults to what sshd listens on. Before keeping new rules, the
+script asks you to confirm that a new SSH login works and rolls back after
+3 minutes otherwise. Rules: `/etc/plportal/firewall.nft` (own table
+`inet plportal_fw`), loaded at boot by `plportal-firewall.service`. Answer
+"n" on a re-run to remove it.
 
 **Upgrade:** `cd plportal && git pull && sudo ./install.sh` (press Enter to
 keep the saved answers).
@@ -89,6 +100,7 @@ refused when the data disk would drop below 2 GB free.
 - HTTPS only (Let's Encrypt via the built-in ACME client); port 80 only
   answers certificate challenges and redirects.
 - Runs as the unprivileged `plportal` user under a hardened systemd unit.
+- Optional host firewall (nftables): inbound SSH, 80 and 443 only.
 - Sign-in failures are rate limited per IP (10 per 15 minutes) and logged.
   Failed client sign-ins get the same message whatever the reason, so the
   page doesn't reveal which codes or emails exist.

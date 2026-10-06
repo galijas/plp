@@ -26,6 +26,10 @@ local SMTP sink). Not yet deployed.
 - Visual design: print-proof theme (cool paper, navy ink, process cyan,
   registration magenta for required/errors, crop marks around sign-in and
   upload zones). Font: Schibsted Grotesk (OFL), self-hosted.
+- Host firewall: install.sh offers nftables rules (own table inet
+  plportal_fw, SSH ports from sshd + 80 + 443 inbound only), no ufw
+  (SERVERware VPS kernel lacks LOG/REJECT). New rules need confirmation
+  from a new SSH login within 3 minutes, else they roll back.
 - Theme selector: "Theme: System/Dark/Light" in the top-right, localStorage
   key `plportal-theme`.
 
