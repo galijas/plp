@@ -81,6 +81,40 @@ func (f *Form) ReplaceGuideLinks() bool {
 	return changed
 }
 
+// SVGNotes are added to the end of the upload questions' descriptions
+// (by item ID): .svg versions of logos and icons are preferred as well.
+var SVGNotes = map[string]string{
+	"desktop_images": svgNote("the example images in the downloaded .zip file don't include them"),
+	"ios_images":     svgNote("they are not among the files listed above"),
+	"android_images": svgNote("they are not among the files listed above"),
+	"web_images":     svgNote("they are not among the files listed above"),
+}
+
+const svgNoteMarker = "**Additional .svg files are preferred:**"
+
+func svgNote(evenThough string) string {
+	return svgNoteMarker + " please also include .svg versions of your logos and icons, even though " +
+		evenThough + ". SVG files result in much better image quality."
+}
+
+// AddSVGNotes appends the SVG note to the upload questions that don't
+// have it yet; reports a change.
+func (f *Form) AddSVGNotes() bool {
+	changed := false
+	for si := range f.Sections {
+		for ii := range f.Sections[si].Items {
+			it := &f.Sections[si].Items[ii]
+			note, ok := SVGNotes[it.ID]
+			if !ok || it.Type != File || strings.Contains(it.Description, svgNoteMarker) {
+				continue
+			}
+			it.Description = strings.TrimRight(it.Description, " \n") + "\n\n" + note
+			changed = true
+		}
+	}
+	return changed
+}
+
 // ArchiveExts are compressed archive types accepted alongside the branding
 // file types, so clients can send a folder packed with any common tool.
 var ArchiveExts = []string{".zip", ".7z", ".rar", ".tar", ".gz", ".tgz", ".bz2", ".xz"}

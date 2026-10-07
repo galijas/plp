@@ -135,12 +135,16 @@ var migrations = []string{
 
 	// 4: links to Google Drive/Docs guides point to the portal's guides.
 	"",
+
+	// 5: upload questions say that .svg files are preferred as well.
+	"",
 }
 
 // migrationHooks run after a migration's SQL, in the same transaction.
 var migrationHooks = map[int]func(*sql.Tx) error{
 	3: applyUploadLimits,
 	4: replaceGuideLinks,
+	5: addSVGNotes,
 }
 
 func (s *Store) migrate() error {

@@ -28,3 +28,10 @@ func TestDefaultFormHasNoGoogleDocLinks(t *testing.T) {
 		t.Error("the default form still links to Google Drive/Docs guides")
 	}
 }
+
+func TestDefaultFormHasSVGNotes(t *testing.T) {
+	f := Default()
+	if f.AddSVGNotes() {
+		t.Error("the default form is missing the .svg notes")
+	}
+}

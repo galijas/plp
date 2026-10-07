@@ -275,3 +275,32 @@ func replaceGuideLinks(tx *sql.Tx) error {
 	_, err = tx.Exec(`INSERT INTO audit(at, actor_kind, actor, ip, action, detail) VALUES (?, 'system', 'upgrade', '', 'form.edit', 'links to Google Drive/Docs guides now point to the guides on this server')`, now())
 	return err
 }
+
+// addSVGNotes (migration 5) saves a new version of the current form in
+// which the upload questions ask for .svg files as well.
+func addSVGNotes(tx *sql.Tx) error {
+	var js string
+	err := tx.QueryRow(`SELECT json FROM form_versions ORDER BY id DESC LIMIT 1`).Scan(&js)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	var f formdef.Form
+	if err := json.Unmarshal([]byte(js), &f); err != nil {
+		return err
+	}
+	if !f.AddSVGNotes() {
+		return nil
+	}
+	b, err := json.Marshal(f)
+	if err != nil {
+		return err
+	}
+	if _, err := tx.Exec(`INSERT INTO form_versions(json, created_at, created_by) VALUES (?, ?, 'system')`, string(b), now()); err != nil {
+		return err
+	}
+	_, err = tx.Exec(`INSERT INTO audit(at, actor_kind, actor, ip, action, detail) VALUES (?, 'system', 'upgrade', '', 'form.edit', 'upload questions: added that .svg files are preferred as well')`, now())
+	return err
+}

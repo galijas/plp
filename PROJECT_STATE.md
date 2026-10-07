@@ -60,6 +60,8 @@ of 2026-10-06). Nothing is half-done. Open items are under "Next".
   Guides/. Migration 4 rewrote the live form's links. Other links checked:
   all third-party/downloads.bicomsystems.com; the MSDN code-signing link
   redirects to archived IE docs (told the user).
+- Upload descriptions end with "Additional .svg files are preferred: ..."
+  (2026-10-07, migration 5 added it to the live form).
 - Form: copy of the Google Form (3 sections). Drafts auto-save; files
   upload in 16 MB chunks, resumable; required answers checked client and
   server side.
