@@ -347,19 +347,23 @@ input[type="radio"], input[type="checkbox"] { accent-color: var(--cyan); width: 
 /* ---------- Sign-in ----------
  * The box follows the Bicom Systems login page (login.bicomsystems.com):
  * a plain card with a 5 px radius and a soft two-layer shadow, outlined
- * fields with floating labels, and a full-width flat button in the
- * login page's blue (#148acb), uppercase like the original. */
+ * fields with floating labels, and a full-width flat uppercase button.
+ * Colors are the portal's Bicom palette (blue #175cff on light, light
+ * blue #50b5ff on dark), which keeps the button text readable (WCAG AA). */
 
 :root {
-  --login-btn: #148acb;
-  --login-btn-hover: #1179b3;
-  --login-title: #4c4c4c;
+  --login-btn: #175cff;
+  --login-btn-hover: #0f4de0;
+  --login-btn-ink: #ffffff;
+  --login-title: var(--ink);
   --login-field: rgba(0, 0, 0, .38);
   --login-field-hover: rgba(0, 0, 0, .87);
   --login-shadow: rgba(60, 66, 87, .12) 0 7px 14px, rgba(0, 0, 0, .12) 0 3px 6px;
 }
 :root[data-theme="dark"] {
-  --login-title: var(--ink-2);
+  --login-btn: #50b5ff;
+  --login-btn-hover: #7cc8ff;
+  --login-btn-ink: #0b163f;
   --login-field: rgba(255, 255, 255, .38);
   --login-field-hover: rgba(255, 255, 255, .87);
   --login-shadow: rgba(0, 0, 0, .35) 0 7px 14px, rgba(0, 0, 0, .3) 0 3px 6px;
@@ -378,8 +382,8 @@ input[type="radio"], input[type="checkbox"] { accent-color: var(--cyan); width: 
   padding: 30px;
   box-shadow: var(--login-shadow);
 }
-.signin h1 { font-size: 18px; font-weight: 400; color: var(--login-title); letter-spacing: 0; }
-.signin .lede { color: var(--ink-2); font-size: .9375rem; margin: 10px 0 25px; }
+.signin h1 { font-size: 22px; font-weight: 400; color: var(--login-title); letter-spacing: 0; }
+.signin .lede { color: var(--ink-2); font-size: 1rem; margin: 10px 0 25px; }
 .signin .flash { margin-bottom: 20px; }
 
 .ofield { position: relative; margin-bottom: 22px; }
@@ -420,9 +424,9 @@ input[type="radio"], input[type="checkbox"] { accent-color: var(--cyan); width: 
   border: 0;
   border-radius: 4px;
   background: var(--login-btn);
-  color: #fff;
+  color: var(--login-btn-ink);
   font: inherit;
-  font-size: .875rem;
+  font-size: .9375rem;
   font-weight: 500;
   letter-spacing: .0892857143em;
   text-transform: uppercase;
@@ -436,8 +440,8 @@ input[type="radio"], input[type="checkbox"] { accent-color: var(--cyan); width: 
   margin: 25px 0 0;
   padding-top: 20px;
   border-top: 1px solid var(--rule);
-  font-size: .9375rem;
-  color: var(--login-title);
+  font-size: 1rem;
+  color: var(--ink-2);
   text-align: center;
 }
 
