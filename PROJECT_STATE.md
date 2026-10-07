@@ -54,8 +54,9 @@ of 2026-10-06). Nothing is half-done. Open items are under "Next".
 - Guides (2026-10-07): the four Google Drive/Docs links now point to PDFs
   served by the portal at /guides/<name> (signed-in users only, inline in
   a new tab) and /guides/all.zip ("Download All Guides" button above
-  Submit). The PDFs live in /var/lib/plportal/guides on the VPS, NOT in
-  the repo (GitHub repo is public); sources in ~/claude/Resources/PLPortal
+  Submit). The PDFs are in the repo's guides/ (user's choice
+  2026-10-07, aware the GitHub repo is public) and install.sh copies them
+  to /var/lib/plportal/guides; sources in ~/claude/Resources/PLPortal
   Guides/. Migration 4 rewrote the live form's links. Other links checked:
   all third-party/downloads.bicomsystems.com; the MSDN code-signing link
   redirects to archived IE docs (told the user).

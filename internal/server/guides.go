@@ -11,10 +11,11 @@ import (
 	"strings"
 )
 
-// Guides are PDFs that form descriptions link to, kept in data/guides on
-// the server (not in the repository, which is public) and served only to
-// signed-in clients and admins. Form links use guideURL(file name).
-// To replace a guide, copy a PDF with the same name into that directory.
+// Guides are PDFs that form descriptions link to. They are kept in the
+// repository's guides/ directory, which install.sh copies to data/guides,
+// and served from there only to signed-in clients and admins. Form links
+// use guideURL(file name). To replace a guide, replace the PDF in guides/
+// (same name) and deploy.
 
 const allGuidesName = "Private Label Guides.zip"
 

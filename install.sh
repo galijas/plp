@@ -264,8 +264,16 @@ if ! id "$APP" >/dev/null 2>&1; then
   log "created system user $APP"
 fi
 install -d -m 700 -o "$APP" -g "$APP" "$DATA_DIR"
-# Guides linked from the form (PDFs); kept out of the public repository.
+# Guides linked from the form: the PDFs in the repository's guides/ are
+# copied in on every run (same name = replaced; other files there are kept).
 install -d -m 700 -o "$APP" -g "$APP" "$DATA_DIR/guides"
+GUIDES=0
+for g in guides/*.pdf; do
+  [ -f "$g" ] || continue
+  install -m 600 -o "$APP" -g "$APP" "$g" "$DATA_DIR/guides/"
+  GUIDES=$((GUIDES + 1))
+done
+log "guides: $GUIDES PDF(s) from guides/ installed to $DATA_DIR/guides"
 
 # --- First admin account (first install only). Printed on exit however the
 # script ends, since it is shown only once.
