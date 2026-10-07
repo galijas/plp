@@ -355,6 +355,9 @@ input[type="radio"], input[type="checkbox"] { accent-color: var(--cyan); width: 
   --login-btn: #175cff;
   --login-btn-hover: #0f4de0;
   --login-btn-ink: #ffffff;
+  /* Light-theme button: the exact blue of the Bicom Systems login page. */
+  --login-btn-bg: #148acb;
+  --login-btn-bg-hover: #1179b3;
   --login-title: var(--ink);
   --login-field: rgba(0, 0, 0, .38);
   --login-field-hover: rgba(0, 0, 0, .87);
@@ -364,6 +367,8 @@ input[type="radio"], input[type="checkbox"] { accent-color: var(--cyan); width: 
   --login-btn: #50b5ff;
   --login-btn-hover: #7cc8ff;
   --login-btn-ink: #0b163f;
+  --login-btn-bg: var(--login-btn);
+  --login-btn-bg-hover: var(--login-btn-hover);
   --login-field: rgba(255, 255, 255, .38);
   --login-field-hover: rgba(255, 255, 255, .87);
   --login-shadow: rgba(0, 0, 0, .35) 0 7px 14px, rgba(0, 0, 0, .3) 0 3px 6px;
@@ -423,7 +428,7 @@ input[type="radio"], input[type="checkbox"] { accent-color: var(--cyan); width: 
   padding: 15px 0;
   border: 0;
   border-radius: 4px;
-  background: var(--login-btn);
+  background: var(--login-btn-bg);
   color: var(--login-btn-ink);
   font: inherit;
   font-size: .9375rem;
@@ -433,7 +438,7 @@ input[type="radio"], input[type="checkbox"] { accent-color: var(--cyan); width: 
   cursor: pointer;
   transition: background .2s;
 }
-.login-btn:hover { background: var(--login-btn-hover); }
+.login-btn:hover { background: var(--login-btn-bg-hover); }
 .login-btn:focus-visible { outline: 2px solid var(--login-btn); outline-offset: 3px; }
 
 .signin .alt {
