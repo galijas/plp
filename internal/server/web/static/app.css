@@ -2,9 +2,10 @@
  *
  * Font: Inter (Bicom Systems' default), self-hosted.
  *
- * Colors are Bicom Systems' (bicomsystems.com): navy #0b163f, blue
- * #175cff, light blue #50b5ff, green #5cc9a7. Light theme: white and
- * light blue with navy text; dark theme: navy with white text. Red is
+ * Light theme: Bicom Systems colors (bicomsystems.com): white and light
+ * blue with navy #0b163f text and blue #175cff actions. Dark theme: the
+ * DT Collector / SwarmDialer dark palette (amber #ffb454 actions, blue
+ * #5eb1ff links). Red is
  * used only for "required" and errors. (The --cyan/--magenta token
  * names are historical: they hold the accent and the error color.) Crop marks frame
  * the places where something is handed over (sign-in and file uploads).
@@ -40,6 +41,7 @@
   --cyan: #175cff;
   --cyan-ink: #ffffff;
   --cyan-wash: #e4f2ff;
+  --link: #175cff;
   --magenta: #c8233a;
   --magenta-wash: #fde8eb;
   --ok: #1b7a5c;
@@ -55,28 +57,31 @@
 }
 
 :root[data-theme="dark"] {
-  /* Dark theme: Bicom navy with white text, Bicom light blue actions. */
-  --paper: #0b163f;
-  --sheet: #12214f;
-  --sheet-2: #172959;
-  --ink: #ffffff;
-  --ink-2: #c5cee6;
-  --ink-3: #98a5c8;
-  --rule: #253a72;
-  --rule-strong: #3d5594;
-  --cyan: #50b5ff;
-  --cyan-ink: #0b163f;
-  --cyan-wash: #163d78;
-  --magenta: #ff7a8a;
-  --magenta-wash: #4a1d35;
-  --ok: #5cc9a7;
-  --ok-wash: #123f45;
-  --warn: #ffb116;
-  --warn-wash: #3d3420;
-  --mark: #50b5ff;
+  /* Dark theme: the DT Collector / SwarmDialer dark palette (near-black
+     blue-grey surfaces, amber actions, blue links). The sign-in button
+     keeps its own colors (--login-btn below). */
+  --paper: #0b0d12;
+  --sheet: #12151c;
+  --sheet-2: #171b25;
+  --ink: #e7e9f0;
+  --ink-2: #bcc2d0;
+  --ink-3: #8b93a7;
+  --rule: #262c3d;
+  --rule-strong: #3a3f4d;
+  --cyan: #ffb454;
+  --cyan-ink: #1a1305;
+  --cyan-wash: #2a2114;
+  --link: #5eb1ff;
+  --magenta: #ff5470;
+  --magenta-wash: #2c141b;
+  --ok: #3ddc97;
+  --ok-wash: #11271f;
+  --warn: #ffc978;
+  --warn-wash: #2a2114;
+  --mark: #8b93a7;
   --icon: #ffffff;
-  --focus: #50b5ff;
-  --shadow: 0 1px 0 rgba(0, 0, 0, .25), 0 12px 28px -14px rgba(0, 0, 0, .6);
+  --focus: #ffb454;
+  --shadow: 0 1px 0 rgba(0, 0, 0, .3), 0 12px 28px -14px rgba(0, 0, 0, .7);
   color-scheme: dark;
 }
 
@@ -94,7 +99,7 @@ body {
   flex-direction: column;
 }
 
-a { color: var(--cyan); text-underline-offset: .18em; }
+a { color: var(--link); text-underline-offset: .18em; }
 a:hover { text-decoration-thickness: 2px; }
 
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 3px; }
@@ -272,7 +277,7 @@ main { flex: 1; width: 100%; }
 
 .linklike {
   font: inherit;
-  color: var(--cyan);
+  color: var(--link);
   background: none;
   border: 0;
   padding: 0;
@@ -739,7 +744,7 @@ table.table { width: 100%; border-collapse: collapse; font-size: .9375rem; }
 
 .pager { display: flex; gap: 10px; align-items: center; justify-content: flex-end; margin-top: 14px; font-size: .9375rem; color: var(--ink-2); }
 
-details.more > summary { cursor: pointer; color: var(--cyan); font-weight: 550; margin: 8px 0; }
+details.more > summary { cursor: pointer; color: var(--link); font-weight: 550; margin: 8px 0; }
 details.more[open] > summary { margin-bottom: 14px; }
 
 dialog {
@@ -752,6 +757,7 @@ dialog {
   box-shadow: var(--shadow);
 }
 dialog::backdrop { background: rgba(11, 22, 63, .6); }
+:root[data-theme="dark"] dialog::backdrop { background: rgba(5, 6, 10, .7); }
 dialog .dlg-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 0; }
 dialog .dlg-head h2 { margin: 0; font-size: 1.25rem; }
 dialog .dlg-body { padding: 16px 22px 22px; max-height: 70vh; overflow: auto; }
