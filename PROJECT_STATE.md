@@ -46,6 +46,11 @@ of 2026-10-06). Nothing is half-done. Open items are under "Next".
   revoke/restore/delete; codes shown in plain text. Invite link
   `https://<host>/#invite=CODE&email=ADDRESS` fills in the sign-in fields;
   shown with a Copy button after creating/editing a code and on each row.
+- Upload limits (2026-10-07, migration 3 applied them to the live form):
+  per upload question 10 files, 10 MB each, 100 MB together; types: the
+  branding list plus archives .7z .rar .tar .gz .tgz .bz2 .xz. All
+  uploads of a submission go into one zip with a folder per question;
+  uploaded archives sit inside it unchanged (user: unzipping twice is OK).
 - Form: copy of the Google Form (3 sections). Drafts auto-save; files
   upload in 16 MB chunks, resumable; required answers checked client and
   server side.

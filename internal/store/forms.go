@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"slices"
 	"time"
 
 	"plportal/internal/formdef"
@@ -190,4 +191,57 @@ func (s *Store) AllUploadIDs() (map[string]bool, error) {
 		out[id] = true
 	}
 	return out, rows.Err()
+}
+
+// applyUploadLimits (migration 3) saves a new version of the current form
+// in which every upload question takes up to 10 files of 10 MB, 100 MB
+// together, and accepts common archive types besides its listed types.
+// A database without a form yet gets these limits from the default form.
+func applyUploadLimits(tx *sql.Tx) error {
+	var js string
+	err := tx.QueryRow(`SELECT json FROM form_versions ORDER BY id DESC LIMIT 1`).Scan(&js)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	var f formdef.Form
+	if err := json.Unmarshal([]byte(js), &f); err != nil {
+		return err
+	}
+	changed := false
+	for si := range f.Sections {
+		for ii := range f.Sections[si].Items {
+			it := &f.Sections[si].Items[ii]
+			if it.Type != formdef.File {
+				continue
+			}
+			it.MaxFiles, it.MaxFileMB, it.MaxTotalMB = formdef.DefaultFiles, formdef.DefaultFileMB, formdef.DefaultTotalMB
+			if len(it.Accept) > 0 {
+				for _, e := range formdef.ArchiveExts {
+					if !slices.Contains(it.Accept, e) {
+						it.Accept = append(it.Accept, e)
+					}
+				}
+			}
+			changed = true
+		}
+	}
+	if !changed {
+		return nil
+	}
+	if err := f.Validate(); err != nil {
+		return err
+	}
+	b, err := json.Marshal(f)
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec(`INSERT INTO form_versions(json, created_at, created_by) VALUES (?, ?, 'system')`, string(b), now())
+	if err != nil {
+		return err
+	}
+	_, err = tx.Exec(`INSERT INTO audit(at, actor_kind, actor, ip, action, detail) VALUES (?, 'system', 'upgrade', '', 'form.edit', 'upload questions: up to 10 files, 10 MB each, 100 MB together; archive types .7z .rar .tar .gz .tgz .bz2 .xz allowed')`, now())
+	return err
 }

@@ -129,6 +129,14 @@ var migrations = []string{
 	// 2: invite codes no longer pre-fill form answers (the invite link
 	// fills in the code and email instead).
 	`ALTER TABLE invites DROP COLUMN prefill;`,
+
+	// 3: upload limits per question (hook below).
+	"",
+}
+
+// migrationHooks run after a migration's SQL, in the same transaction.
+var migrationHooks = map[int]func(*sql.Tx) error{
+	3: applyUploadLimits,
 }
 
 func (s *Store) migrate() error {
@@ -154,6 +162,12 @@ func (s *Store) migrate() error {
 		}
 		if migrations[i] != "" {
 			if _, err := tx.Exec(migrations[i]); err != nil {
+				tx.Rollback()
+				return fmt.Errorf("migration %d: %w", i+1, err)
+			}
+		}
+		if hook := migrationHooks[i+1]; hook != nil {
+			if err := hook(tx); err != nil {
 				tx.Rollback()
 				return fmt.Errorf("migration %d: %w", i+1, err)
 			}

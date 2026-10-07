@@ -198,16 +198,21 @@ func (s *Server) apiUploadCreate(w http.ResponseWriter, r *http.Request) {
 		s.internal(w, "list uploads", err)
 		return
 	}
-	var total int64
+	var total, itemTotal int64
 	count := 0
 	for _, u := range ups {
 		total += u.Size
 		if u.ItemID == it.ID {
 			count++
+			itemTotal += u.Size
 		}
 	}
 	if count >= it.MaxFiles {
 		jsonError(w, http.StatusBadRequest, fmt.Sprintf("This question takes at most %d file(s). Remove one to add another.", it.MaxFiles))
+		return
+	}
+	if itemTotal+body.Size > int64(it.MaxTotalMB)<<20 {
+		jsonError(w, http.StatusBadRequest, fmt.Sprintf("%s: the files of this question can be at most %d MB together.", name, it.MaxTotalMB))
 		return
 	}
 	if total+body.Size > s.cfg.MaxSubmissionBytes {

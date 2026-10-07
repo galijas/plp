@@ -31,11 +31,17 @@ var Types = []string{Short, Paragraph, Radio, Checkbox, File, Info}
 
 // Limits on file uploads.
 const (
-	MaxFilesLimit  = 20
-	MaxFileMBLimit = 2048
-	DefaultFiles   = 1
-	DefaultFileMB  = 1024
+	MaxFilesLimit   = 20
+	MaxFileMBLimit  = 2048
+	MaxTotalMBLimit = 20480
+	DefaultFiles    = 10
+	DefaultFileMB   = 10
+	DefaultTotalMB  = 100
 )
+
+// ArchiveExts are compressed archive types accepted alongside the branding
+// file types, so clients can send a folder packed with any common tool.
+var ArchiveExts = []string{".zip", ".7z", ".rar", ".tar", ".gz", ".tgz", ".bz2", ".xz"}
 
 type Form struct {
 	Title       string    `json:"title"`
@@ -60,6 +66,7 @@ type Item struct {
 	AllowOther  bool     `json:"allowOther,omitempty"` // radio, checkbox: free-text "Other"
 	MaxFiles    int      `json:"maxFiles,omitempty"`   // file
 	MaxFileMB   int      `json:"maxFileMB,omitempty"`  // file
+	MaxTotalMB  int      `json:"maxTotalMB,omitempty"` // file: all files of this question together
 	Accept      []string `json:"accept,omitempty"`     // file: allowed extensions like ".zip"; empty = any
 }
 
@@ -141,11 +148,20 @@ func (f *Form) Validate() error {
 				if it.MaxFileMB <= 0 {
 					it.MaxFileMB = DefaultFileMB
 				}
+				if it.MaxTotalMB <= 0 {
+					it.MaxTotalMB = max(DefaultTotalMB, it.MaxFileMB)
+				}
 				if it.MaxFiles > MaxFilesLimit {
 					return fmt.Errorf("%q: at most %d files per question", it.Title, MaxFilesLimit)
 				}
 				if it.MaxFileMB > MaxFileMBLimit {
 					return fmt.Errorf("%q: at most %d MB per file", it.Title, MaxFileMBLimit)
+				}
+				if it.MaxTotalMB > MaxTotalMBLimit {
+					return fmt.Errorf("%q: at most %d MB for all files together", it.Title, MaxTotalMBLimit)
+				}
+				if it.MaxTotalMB < it.MaxFileMB {
+					return fmt.Errorf("%q: the total size limit can't be smaller than the size limit per file", it.Title)
 				}
 				var acc []string
 				for _, e := range it.Accept {
@@ -165,7 +181,7 @@ func (f *Form) Validate() error {
 				}
 				it.Accept = acc
 			} else {
-				it.MaxFiles, it.MaxFileMB, it.Accept = 0, 0, nil
+				it.MaxFiles, it.MaxFileMB, it.MaxTotalMB, it.Accept = 0, 0, 0, nil
 			}
 		}
 	}

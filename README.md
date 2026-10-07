@@ -95,9 +95,14 @@ sudo runuser -u plportal -- plportal reset-password -data-dir /var/lib/plportal 
 sudo runuser -u plportal -- plportal create-admin -data-dir /var/lib/plportal -username NAME -email ADDR
 ```
 
-Limits: each file question sets its own file count, size and types (the
-default form allows 5 files of up to 1 GB each); all files of one submission
-together are capped at 3 GB (`PLP_MAX_MB` in the env file). Uploads are
+Limits: each upload question sets its own file count, size per file, total
+size and file types, editable in the form editor. The default (and, since
+migration 3, the live form) allows up to 10 files of 10 MB each and 100 MB
+together per question, as .zip, .png, .svg, .eps, .ai, .pdf, .ico, .jpg,
+.jpeg or another archive (.7z, .rar, .tar, .gz, .tgz, .bz2, .xz). All files
+of one submission together are also capped at 3 GB (`PLP_MAX_MB` in the
+env file). Uploaded archives are stored as they are inside the submission
+zip (no recompression), so they unzip in two steps. Uploads are
 refused when the data disk would drop below 2 GB free.
 
 ## Security notes

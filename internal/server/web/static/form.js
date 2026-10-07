@@ -355,8 +355,25 @@
 
   // ---------- uploads ----------
 
-  function acceptText(it) {
-    return it.accept && it.accept.length ? it.accept.join(', ') : 'any file type';
+  var ARCHIVES = ['.zip', '.7z', '.rar', '.tar', '.gz', '.tgz', '.bz2', '.xz'];
+
+  // limitsText describes an upload question's limits, naming archive types
+  // separately so the list of branding file types stays readable.
+  function limitsText(it) {
+    var n = it.maxFiles, total = it.maxTotalMB || it.maxFileMB;
+    var t = 'Up to ' + n + ' file' + (n > 1 ? 's' : '') + ', ' + it.maxFileMB + ' MB each';
+    if (n > 1) t += ', ' + total + ' MB in total';
+    var acc = it.accept || [];
+    if (!acc.length) return t + ', any file type.';
+    var plain = acc.filter(function (e) { return ARCHIVES.indexOf(e) < 0; });
+    var arch = acc.filter(function (e) { return ARCHIVES.indexOf(e) >= 0; });
+    var types = plain.join(', ');
+    if (arch.length) types += (types ? ', or an archive (' : 'archives (') + arch.join(', ') + ')';
+    return t + '. File types: ' + types + '.';
+  }
+
+  function itemBytes(itemId) {
+    return filesFor(itemId).filter(function (u) { return !u.error; }).reduce(function (n, u) { return n + u.size; }, 0);
   }
 
   function renderUpload(it) {
@@ -366,7 +383,7 @@
     var drop = h('div', { class: 'drop crop' },
       h('button', { class: 'btn', type: 'button', disabled: isAdmin, 'aria-describedby': 'lim-' + it.id, onclick: function () { input.click(); } }, it.maxFiles > 1 ? 'Add files' : 'Add file'),
       h('div', null, isAdmin ? 'Clients drop files here or use the button.' : 'or drop files here'),
-      h('div', { class: 'limits', id: 'lim-' + it.id, text: 'Up to ' + it.maxFiles + ' file' + (it.maxFiles > 1 ? 's' : '') + ', ' + it.maxFileMB + ' MB each, ' + acceptText(it) + '.' }),
+      h('div', { class: 'limits', id: 'lim-' + it.id, text: limitsText(it) }),
       input);
     if (!isAdmin) {
       ['dragenter', 'dragover'].forEach(function (ev) {
@@ -424,6 +441,7 @@
       else if (file.size === 0) problem = 'The file is empty.';
       else if (file.size > it.maxFileMB * 1048576) problem = 'The file is larger than ' + it.maxFileMB + ' MB.';
       else if (filesFor(it.id).length >= it.maxFiles) problem = 'This question takes at most ' + it.maxFiles + ' file' + (it.maxFiles > 1 ? 's' : '') + '. Remove one to add another.';
+      else if (itemBytes(it.id) + file.size > (it.maxTotalMB || it.maxFileMB) * 1048576) problem = 'The files of this question can be at most ' + (it.maxTotalMB || it.maxFileMB) + ' MB together.';
       var u = { id: null, itemId: it.id, name: cleanName(file.name), size: file.size, received: 0, complete: false, file: file, error: problem };
       state.uploads.push(u);
       if (problem) { renderFiles(it.id); return; }
@@ -785,8 +803,9 @@
     var required = h('input', { type: 'checkbox', checked: !!it.required });
     var options = textArea((it.options || []).join('\n'), 4);
     var allowOther = h('input', { type: 'checkbox', checked: !!it.allowOther });
-    var maxFiles = h('input', { type: 'number', min: '1', max: '20', value: String(it.maxFiles || 1) });
-    var maxMB = h('input', { type: 'number', min: '1', max: '2048', value: String(it.maxFileMB || 1024) });
+    var maxFiles = h('input', { type: 'number', min: '1', max: '20', value: String(it.maxFiles || 10) });
+    var maxMB = h('input', { type: 'number', min: '1', max: '2048', value: String(it.maxFileMB || 10) });
+    var maxTotal = h('input', { type: 'number', min: '1', max: '20480', value: String(it.maxTotalMB || 100) });
     var accept = h('input', { type: 'text', value: (it.accept || []).join(', '), placeholder: '.zip, .png, .svg (empty: any type)' });
     var err = h('p', { class: 'error-text', role: 'alert' });
 
@@ -795,7 +814,7 @@
       field('Options, one per line', options),
       h('label', { class: 'check spaced' }, allowOther, h('span', null, 'Add an "Other" choice with a text field')));
     var fileBox = h('div', null,
-      h('div', { class: 'field-row' }, field('Max files', maxFiles), field('Max size per file (MB)', maxMB)),
+      h('div', { class: 'field-row' }, field('Max files', maxFiles), field('Max size per file (MB)', maxMB), field('Max total for this question (MB)', maxTotal)),
       field('Allowed file types', accept, 'Extensions separated by commas. Leave empty to accept any file.'));
 
     function sync() {
@@ -830,16 +849,17 @@
         }
         var acc = accept.value.split(',').map(function (x) { x = x.trim().toLowerCase(); return x && x[0] !== '.' ? '.' + x : x; }).filter(Boolean);
         if (acc.some(function (x) { return !/^\.[a-z0-9]{1,10}$/.test(x); })) { err.textContent = 'Allowed file types must look like .zip or .png.'; accept.focus(); return; }
-        var mf = parseInt(maxFiles.value, 10), mm = parseInt(maxMB.value, 10);
+        var mf = parseInt(maxFiles.value, 10), mm = parseInt(maxMB.value, 10), mt = parseInt(maxTotal.value, 10);
         if (t === 'file' && (!(mf >= 1 && mf <= 20) || !(mm >= 1 && mm <= 2048))) { err.textContent = 'Files: 1 to 20 files, 1 to 2048 MB each.'; return; }
+        if (t === 'file' && !(mt >= mm && mt <= 20480)) { err.textContent = 'The total limit must be at least the per-file limit, and at most 20480 MB.'; return; }
         it.title = title.value.trim();
         it.description = desc.value;
         it.type = t;
         it.required = t !== 'info' && required.checked;
         if (t === 'radio' || t === 'checkbox') { it.options = opts; it.allowOther = allowOther.checked; }
         else { delete it.options; delete it.allowOther; }
-        if (t === 'file') { it.maxFiles = mf; it.maxFileMB = mm; it.accept = acc; }
-        else { delete it.maxFiles; delete it.maxFileMB; delete it.accept; }
+        if (t === 'file') { it.maxFiles = mf; it.maxFileMB = mm; it.maxTotalMB = mt; it.accept = acc; }
+        else { delete it.maxFiles; delete it.maxFileMB; delete it.maxTotalMB; delete it.accept; }
         state.changed[it.id] = true;
         closeEditor(it.id);
       }, function () {
