@@ -72,12 +72,12 @@
 
   // Description markup: **bold**, [text](url), "- " list lines, blank
   // lines between paragraphs. Everything is escaped first; only http(s)
-  // and mailto links become links.
+  // and mailto links, and the portal's own /guides/ files, become links.
   function inline(text) {
     var s = esc(text);
     s = s.replace(/\[([^\]]+)\]\(((?:[^()\s]|\([^()\s]*\))+)\)/g, function (m, label, url) {
       var raw = url.replace(/&amp;/g, '&');
-      if (!/^(https?:\/\/|mailto:)/i.test(raw)) return m;
+      if (!/^(https?:\/\/|mailto:|\/guides\/)/i.test(raw)) return m;
       return '<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + label + '</a>';
     });
     s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
@@ -232,6 +232,7 @@
       root.appendChild(h('div', { class: 'add-row' },
         h('button', { class: 'btn', type: 'button', onclick: addSection }, 'Add a section')));
     }
+    if (state.guides) root.appendChild(renderGuides());
     root.appendChild(renderSubmitZone());
     renderRail();
     if (isAdmin) renderAdminBar();
@@ -624,6 +625,13 @@
     });
   }
 
+  function renderGuides() {
+    return h('section', { class: 'guides-zone', 'aria-labelledby': 'guides-h' },
+      h('h2', { id: 'guides-h' }, 'Guides'),
+      h('p', null, 'Every guide linked in this form, in one zip file, to keep for later.'),
+      h('a', { class: 'btn', href: '/guides/all.zip', download: '' }, 'Download All Guides'));
+  }
+
   function renderSubmitZone() {
     var zone = h('section', { class: 'submit-zone', id: 'submit-zone', 'aria-labelledby': 'submit-h' });
     zone.appendChild(h('h2', { id: 'submit-h', class: 'visually-hidden' }, 'Submit'));
@@ -993,6 +1001,7 @@
       state.user = d.user;
       state.singleUse = !!d.singleUse;
       state.expiresAt = d.expiresAt || '';
+      state.guides = d.guides || 0;
       if (isAdmin) {
         state.saved = JSON.stringify(d.form);
       } else {

@@ -245,3 +245,33 @@ func applyUploadLimits(tx *sql.Tx) error {
 	_, err = tx.Exec(`INSERT INTO audit(at, actor_kind, actor, ip, action, detail) VALUES (?, 'system', 'upgrade', '', 'form.edit', 'upload questions: up to 10 files, 10 MB each, 100 MB together; archive types .7z .rar .tar .gz .tgz .bz2 .xz allowed')`, now())
 	return err
 }
+
+// replaceGuideLinks (migration 4) saves a new version of the current form
+// whose links to the Google Drive/Docs guides point to the portal's own
+// guide files instead.
+func replaceGuideLinks(tx *sql.Tx) error {
+	var js string
+	err := tx.QueryRow(`SELECT json FROM form_versions ORDER BY id DESC LIMIT 1`).Scan(&js)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	var f formdef.Form
+	if err := json.Unmarshal([]byte(js), &f); err != nil {
+		return err
+	}
+	if !f.ReplaceGuideLinks() {
+		return nil
+	}
+	b, err := json.Marshal(f)
+	if err != nil {
+		return err
+	}
+	if _, err := tx.Exec(`INSERT INTO form_versions(json, created_at, created_by) VALUES (?, ?, 'system')`, string(b), now()); err != nil {
+		return err
+	}
+	_, err = tx.Exec(`INSERT INTO audit(at, actor_kind, actor, ip, action, detail) VALUES (?, 'system', 'upgrade', '', 'form.edit', 'links to Google Drive/Docs guides now point to the guides on this server')`, now())
+	return err
+}

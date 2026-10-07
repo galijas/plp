@@ -572,6 +572,9 @@ input[type="radio"], input[type="checkbox"] { accent-color: var(--cyan); width: 
 .bar { grid-column: 1 / -1; height: 4px; background: var(--rule); border-radius: 2px; overflow: hidden; }
 .bar span { display: block; height: 100%; width: 0; background: var(--cyan); transition: width .2s linear; }
 
+.guides-zone { margin-top: 48px; padding-top: 22px; border-top: 1px solid var(--rule); }
+.guides-zone h2 { font-size: 1.1875rem; font-weight: 650; }
+.guides-zone p { color: var(--ink-2); margin: 6px 0 14px; }
 .submit-zone { margin-top: 48px; padding-top: 28px; border-top: 2px solid var(--ink); }
 .submit-zone p { color: var(--ink-2); margin: 0 0 18px; }
 .submit-zone .missing { color: var(--magenta); margin: 14px 0 0; padding-left: 1.2em; }

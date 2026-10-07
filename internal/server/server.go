@@ -72,7 +72,7 @@ func New(cfg Config) (*Server, error) {
 	}
 	cfg.PublicURL = strings.TrimSuffix(cfg.PublicURL, "/")
 	s := &Server{cfg: cfg, st: cfg.Store, log: cfg.Logger, loc: cfg.Location, logins: newLimiter(10, 15*time.Minute)}
-	for _, d := range []string{s.stagingDir(), s.submissionsDir()} {
+	for _, d := range []string{s.stagingDir(), s.submissionsDir(), s.guidesDir()} {
 		if err := os.MkdirAll(d, 0o700); err != nil {
 			return nil, err
 		}
@@ -100,6 +100,8 @@ func New(cfg Config) (*Server, error) {
 	mux.HandleFunc("POST /logout", s.handleLogout)
 	mux.HandleFunc("GET /form", s.anyUser(s.handleFormPage))
 	mux.HandleFunc("GET /done", s.handleDone)
+	mux.HandleFunc("GET /guides/all.zip", s.anyUser(s.handleAllGuides))
+	mux.HandleFunc("GET /guides/{name}", s.anyUser(s.handleGuide))
 
 	mux.HandleFunc("GET /api/form", s.anyUser(s.apiForm))
 	mux.HandleFunc("PUT /api/draft", s.guest(s.apiSaveDraft))

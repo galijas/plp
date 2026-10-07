@@ -55,6 +55,7 @@ func (s *Server) apiForm(w http.ResponseWriter, r *http.Request) {
 		"version":       ver,
 		"maxTotalBytes": s.cfg.MaxSubmissionBytes,
 		"maxChunkBytes": maxChunk,
+		"guides":        len(s.guides()),
 	}
 	if a := adminFrom(r); a != nil {
 		resp["role"] = "admin"

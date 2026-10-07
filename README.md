@@ -83,6 +83,7 @@ sudo ./install.sh
 | Unsent uploads (drafts) | `/var/lib/plportal/staging/` (incomplete uploads are removed after 48 h) |
 | Database backups | `/var/lib/plportal/backups/` (daily, last 14 kept) |
 | Certificates | `/var/lib/plportal/autocert/` |
+| Guides (PDFs linked from the form) | `/var/lib/plportal/guides/` (not in the repository; copy files there, owner `plportal`) |
 
 The daily backup covers the database only. Back up
 `/var/lib/plportal/submissions/` with your usual file backup; it holds the

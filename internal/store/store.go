@@ -132,11 +132,15 @@ var migrations = []string{
 
 	// 3: upload limits per question (hook below).
 	"",
+
+	// 4: links to Google Drive/Docs guides point to the portal's guides.
+	"",
 }
 
 // migrationHooks run after a migration's SQL, in the same transaction.
 var migrationHooks = map[int]func(*sql.Tx) error{
 	3: applyUploadLimits,
+	4: replaceGuideLinks,
 }
 
 func (s *Store) migrate() error {

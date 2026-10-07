@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"regexp"
 	"slices"
 	"strings"
@@ -38,6 +39,47 @@ const (
 	DefaultFileMB   = 10
 	DefaultTotalMB  = 100
 )
+
+// GuideLinks maps Google Drive/Docs documents that the original form linked
+// to (by document ID) to the guide PDFs the portal serves instead.
+var GuideLinks = map[string]string{
+	"1orGL4dagr3CyZUVArNwFMHtSArhdn-i0":            "How to ship to Bicom Systems in Bosnia and Herzegovina.pdf",
+	"1SK7Ni1ZwDAYxCjaTRSENthWz1uvhwnH_pm4Iv0wVz7g": "Google OAuth guide.pdf",
+	"1ltCpL2D-1MeB97yTKhrxmDYBXS_jh4s8tj7YaeHy_6I": "Guide - How to publish in Chrome Web Store.pdf",
+	"1g_L823jxejl5aFwsDlFVU3oJi78qzhUCUqnh3TFNjtI": "Guide - How to publish in Firefox store.pdf",
+}
+
+var googleDocRe = regexp.MustCompile(`https://(?:drive|docs)\.google\.com/[^\s()]*?/d/([A-Za-z0-9_-]+)[^\s()]*`)
+
+// ReplaceGuideLinks points links to the known Google documents at the
+// portal's own guide files (/guides/<file name>). Other links are kept.
+func ReplaceGuideLinks(text string) string {
+	return googleDocRe.ReplaceAllStringFunc(text, func(u string) string {
+		id := googleDocRe.FindStringSubmatch(u)[1]
+		if name, ok := GuideLinks[id]; ok {
+			return "/guides/" + url.PathEscape(name)
+		}
+		return u
+	})
+}
+
+// ReplaceGuideLinks in every description of the form; reports a change.
+func (f *Form) ReplaceGuideLinks() bool {
+	changed := false
+	fix := func(s *string) {
+		if n := ReplaceGuideLinks(*s); n != *s {
+			*s, changed = n, true
+		}
+	}
+	fix(&f.Description)
+	for si := range f.Sections {
+		fix(&f.Sections[si].Description)
+		for ii := range f.Sections[si].Items {
+			fix(&f.Sections[si].Items[ii].Description)
+		}
+	}
+	return changed
+}
 
 // ArchiveExts are compressed archive types accepted alongside the branding
 // file types, so clients can send a folder packed with any common tool.

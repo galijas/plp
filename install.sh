@@ -264,6 +264,8 @@ if ! id "$APP" >/dev/null 2>&1; then
   log "created system user $APP"
 fi
 install -d -m 700 -o "$APP" -g "$APP" "$DATA_DIR"
+# Guides linked from the form (PDFs); kept out of the public repository.
+install -d -m 700 -o "$APP" -g "$APP" "$DATA_DIR/guides"
 
 # --- First admin account (first install only). Printed on exit however the
 # script ends, since it is shown only once.
