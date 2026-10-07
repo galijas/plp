@@ -2,11 +2,20 @@
 
 Read this first when continuing work.
 
-## RESUME HERE (2026-10-06)
+## RESUME HERE (2026-10-07)
 
 Live at https://privatelabel.dtbicom.xyz, running the latest commit
-(local, GitHub, Gitea and the VPS were all at the same commit at the end
-of 2026-10-06). Nothing is half-done. Open items are under "Next".
+(local, GitHub, Gitea and the VPS all at the same commit at the end of
+2026-10-07). Nothing is half-done. Open items are under "Next".
+
+Done on 2026-10-07: Bicom colors (light theme), Bicom-style sign-in box
+(light button #148acb, dark #50b5ff), DT Collector dark palette with the
+#50b5ff accent, client PDF copy of answers by email, upload limits per
+question (10 files / 10 MB / 100 MB, archive types), guides served from
+the portal (+ Download All Guides), .svg note on upload questions. SMTP
+is configured live (Gmail, smtp.gmail.com:465 TLS, sender
+amer.bicom@gmail.com) and test emails arrive (the first ones went to
+spam/were delayed on the bicomsystems.com side). Schema version 5.
 
 - Repo: `~/claude/Projects/PrivateLabel_Portal`
 - Remotes: `origin` = git@github.com:galijas/plp.git,
@@ -117,7 +126,8 @@ of 2026-10-06). Nothing is half-done. Open items are under "Next".
 
 ## Next
 
-- Configure SMTP on the live site with the real relay and send a test.
+- SMTP runs through a personal Gmail account; a bicomsystems.com mailbox
+  or Bicom's relay would deliver more reliably (suggested, not decided).
 - Try a real client flow end to end over the internet, including a large
   (about 1 GB) upload.
 - Mid-size screens (960 to 1340 px): the form and section overview are
@@ -126,5 +136,10 @@ of 2026-10-06). Nothing is half-done. Open items are under "Next".
 - Optional, offered but not requested: the same nftables firewall in DT
   Collector's installer; cleanup of the empty ufw tables on the DT
   Collector VPS.
+- Expired/used-up status chips are still amber in the dark theme (asked
+  the user; no answer yet).
+- Offered, not requested: log the SMTP server's message ID; re-redact
+  page 7 (OAuth client secret strokes) and page 14 (bookmarks) of the
+  Google OAuth guide (user said it's fine as is).
 - Daily backup covers the database only; submission files in
   /var/lib/plportal/submissions need a separate file backup.
