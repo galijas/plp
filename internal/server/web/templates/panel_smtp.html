@@ -6,7 +6,7 @@
   <div class="panel-body">
     {{template "flash" .}}
     <h1>Configure SMTP</h1>
-    <p class="lede">When a client submits the form, every admin with a notification email gets a short message with the company name, the client's email and a link to the submission. Answers are never put in the email, since they can contain secrets.</p>
+    <p class="lede">When a client submits the form, every admin with a notification email gets a short message with the company name, the client's email and a link to the submission; answers are not put in admin emails. The client can also get a copy of their own answers as a PDF (option below).</p>
 
     <form method="post" action="/admin/smtp" class="card" data-w="720">
       <label class="check" data-sp="18"><input type="checkbox" name="enabled" value="1"{{if $c.Enabled}} checked{{end}}> <span><strong>Send notification emails</strong></span></label>
@@ -32,6 +32,7 @@
         <div class="field"><label for="s-from">Sender address</label><input type="email" id="s-from" name="from" value="{{$c.From}}" placeholder="portal@example.com"></div>
         <div class="field"><label for="s-name">Sender name</label><input type="text" id="s-name" name="fromName" value="{{$c.FromName}}" maxlength="100"></div>
       </div>
+      <label class="check spaced"><input type="checkbox" name="clientCopy" value="1"{{if $c.ClientCopy}} checked{{end}}> <span><strong>Send clients a copy of their answers</strong><br><span class="hint">After submitting, the client gets an email with their answers as a PDF (no uploaded files) at the email they signed in with.</span></span></label>
       <button class="btn primary" type="submit">Save SMTP settings</button>
     </form>
 

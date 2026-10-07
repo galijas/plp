@@ -1,8 +1,12 @@
-// Package mail sends plain-text notification emails over SMTP.
+// Package mail sends notification emails over SMTP: plain text, optionally
+// with attachments.
 package mail
 
 import (
+	"crypto/rand"
 	"crypto/tls"
+	"encoding/base64"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"mime"
@@ -30,6 +34,16 @@ type Config struct {
 	Password string `json:"password"`
 	From     string `json:"from"`
 	FromName string `json:"fromName"`
+	// ClientCopy sends the client who submitted a copy of their answers
+	// (PDF attachment). On unless an admin turns it off.
+	ClientCopy bool `json:"clientCopy"`
+}
+
+// Attachment is a file sent with a message.
+type Attachment struct {
+	Name        string
+	ContentType string
+	Data        []byte
 }
 
 func (c *Config) Validate() error {
@@ -58,8 +72,9 @@ func (c *Config) Validate() error {
 
 const timeout = 20 * time.Second
 
-// Send delivers one message to all recipients (each sees only themselves in To).
-func Send(c Config, to []string, subject, body string) error {
+// Send delivers one message to all recipients (each sees only themselves
+// in To), with optional attachments.
+func Send(c Config, to []string, subject, body string, attachments ...Attachment) error {
 	if len(to) == 0 {
 		return errors.New("no recipients")
 	}
@@ -119,9 +134,7 @@ func Send(c Config, to []string, subject, body string) error {
 		msg.WriteString("Subject: " + mime.QEncoding.Encode("utf-8", subject) + "\r\n")
 		msg.WriteString("Date: " + time.Now().Format(time.RFC1123Z) + "\r\n")
 		msg.WriteString("MIME-Version: 1.0\r\n")
-		msg.WriteString("Content-Type: text/plain; charset=utf-8\r\n")
-		msg.WriteString("Content-Transfer-Encoding: 8bit\r\n\r\n")
-		msg.WriteString(strings.ReplaceAll(strings.ReplaceAll(body, "\r\n", "\n"), "\n", "\r\n"))
+		writeBody(&msg, body, attachments)
 		if _, err := wc.Write([]byte(msg.String())); err != nil {
 			return err
 		}
@@ -133,4 +146,48 @@ func Send(c Config, to []string, subject, body string) error {
 		}
 	}
 	return cl.Quit()
+}
+
+func crlf(s string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(s, "\r\n", "\n"), "\n", "\r\n")
+}
+
+// writeBody writes the Content-Type headers and body: plain text alone, or
+// multipart/mixed with the text first and each attachment base64-encoded.
+func writeBody(msg *strings.Builder, body string, attachments []Attachment) {
+	if len(attachments) == 0 {
+		msg.WriteString("Content-Type: text/plain; charset=utf-8\r\n")
+		msg.WriteString("Content-Transfer-Encoding: 8bit\r\n\r\n")
+		msg.WriteString(crlf(body))
+		return
+	}
+	boundary := "plp-" + randomBoundary()
+	msg.WriteString("Content-Type: multipart/mixed; boundary=\"" + boundary + "\"\r\n\r\n")
+	msg.WriteString("--" + boundary + "\r\n")
+	msg.WriteString("Content-Type: text/plain; charset=utf-8\r\n")
+	msg.WriteString("Content-Transfer-Encoding: 8bit\r\n\r\n")
+	msg.WriteString(crlf(body) + "\r\n")
+	for _, a := range attachments {
+		ct := a.ContentType
+		if ct == "" {
+			ct = "application/octet-stream"
+		}
+		msg.WriteString("--" + boundary + "\r\n")
+		msg.WriteString("Content-Type: " + mime.FormatMediaType(ct, map[string]string{"name": a.Name}) + "\r\n")
+		msg.WriteString("Content-Disposition: " + mime.FormatMediaType("attachment", map[string]string{"filename": a.Name}) + "\r\n")
+		msg.WriteString("Content-Transfer-Encoding: base64\r\n\r\n")
+		enc := base64.StdEncoding.EncodeToString(a.Data)
+		for len(enc) > 76 {
+			msg.WriteString(enc[:76] + "\r\n")
+			enc = enc[76:]
+		}
+		msg.WriteString(enc + "\r\n")
+	}
+	msg.WriteString("--" + boundary + "--\r\n")
+}
+
+func randomBoundary() string {
+	var b [12]byte
+	rand.Read(b[:])
+	return hex.EncodeToString(b[:])
 }

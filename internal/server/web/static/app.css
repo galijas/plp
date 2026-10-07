@@ -302,7 +302,7 @@ input[readonly] { background: var(--sheet-2); color: var(--ink-2); }
 input[type="radio"], input[type="checkbox"] { accent-color: var(--cyan); width: 18px; height: 18px; margin: 3px 0 0; flex: none; }
 
 .field { display: grid; gap: 6px; margin-bottom: 16px; }
-.field .hint { color: var(--ink-3); font-size: .8125rem; font-weight: 400; }
+.field .hint, .check .hint { color: var(--ink-3); font-size: .8125rem; font-weight: 400; }
 .field-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0 16px; }
 
 .check { display: flex; gap: 10px; align-items: flex-start; font-weight: 400; cursor: pointer; }

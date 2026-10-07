@@ -24,7 +24,8 @@ submissions.
   3. Action Logs (filter by time, user, action; CSV export)
   4. Accounts
   5. Security (own password and notification email)
-  6. Configure SMTP (email to all admins on each new submission)
+  6. Configure SMTP (email to all admins on each new submission, and
+     optionally a PDF copy of their answers to the client who submitted)
 
 ## Submissions
 
@@ -113,8 +114,10 @@ refused when the data disk would drop below 2 GB free.
   cross-origin request protection on every form and API call.
 - Downloads are always sent as attachments; uploaded files are never
   rendered by the browser.
-- Notification emails contain no answers (they can include secrets such as
-  the Google project secret), only a link to the submission.
+- Admin notification emails contain no answers (they can include secrets
+  such as the Google project secret), only a link to the submission. The
+  optional client copy sends the answers PDF only to the email the client
+  signed in with.
 
 ## Development
 

@@ -2,6 +2,7 @@
 <section class="done">
   <h1>Thank you, your form was submitted</h1>
   <p>We received your answers and files. Your Bicom Systems contact will follow up on the project ticket thread.</p>
+  {{if .Data}}<p>A copy of your answers (PDF) is on its way to your email address.</p>{{end}}
   <p>If something is missing or needs changing, reply on the ticket thread. If your invite code allows more submissions, you can also sign in again and send an updated form.</p>
   <p><a class="btn" href="/">Back to sign-in</a></p>
 </section>

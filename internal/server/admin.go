@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"encoding/csv"
 	"encoding/json"
 	"errors"
@@ -625,7 +626,7 @@ func (s *Server) handleOwnEmail(w http.ResponseWriter, r *http.Request) {
 const smtpKey = "smtp"
 
 func (s *Server) smtpConfig() mail.Config {
-	c := mail.Config{Port: 587, Security: mail.StartTLS, FromName: "Private Label Portal"}
+	c := mail.Config{Port: 587, Security: mail.StartTLS, FromName: "Private Label Portal", ClientCopy: true}
 	if v, _ := s.st.Setting(smtpKey); v != "" {
 		json.Unmarshal([]byte(v), &c)
 	}
@@ -650,14 +651,15 @@ func (s *Server) handleSMTPSave(w http.ResponseWriter, r *http.Request) {
 	old := s.smtpConfig()
 	port, _ := strconv.Atoi(strings.TrimSpace(r.PostFormValue("port")))
 	c := mail.Config{
-		Enabled:  r.PostFormValue("enabled") == "1",
-		Host:     r.PostFormValue("host"),
-		Port:     port,
-		Security: r.PostFormValue("security"),
-		Username: r.PostFormValue("username"),
-		Password: r.PostFormValue("password"),
-		From:     r.PostFormValue("from"),
-		FromName: strings.TrimSpace(r.PostFormValue("fromName")),
+		Enabled:    r.PostFormValue("enabled") == "1",
+		Host:       r.PostFormValue("host"),
+		Port:       port,
+		Security:   r.PostFormValue("security"),
+		Username:   r.PostFormValue("username"),
+		Password:   r.PostFormValue("password"),
+		From:       r.PostFormValue("from"),
+		FromName:   strings.TrimSpace(r.PostFormValue("fromName")),
+		ClientCopy: r.PostFormValue("clientCopy") == "1",
 	}
 	if c.Password == "" && r.PostFormValue("clearPassword") != "1" {
 		c.Password = old.Password // blank field keeps the saved password
@@ -677,7 +679,11 @@ func (s *Server) handleSMTPSave(w http.ResponseWriter, r *http.Request) {
 	if c.Enabled {
 		state = "enabled"
 	}
-	s.logAdmin(r, "smtp.update", fmt.Sprintf("%s, %s:%d (%s), from %s", state, c.Host, c.Port, c.Security, c.From))
+	copyState := "off"
+	if c.ClientCopy {
+		copyState = "on"
+	}
+	s.logAdmin(r, "smtp.update", fmt.Sprintf("%s, %s:%d (%s), from %s, client copy %s", state, c.Host, c.Port, c.Security, c.From, copyState))
 	s.redirectFlash(w, r, "/admin/smtp", "Saved the SMTP settings.")
 }
 
@@ -703,14 +709,23 @@ func (s *Server) handleSMTPTest(w http.ResponseWriter, r *http.Request) {
 	s.redirectFlash(w, r, "/admin/smtp", "Sent a test email to "+a.Email+".")
 }
 
-// notifySubmission emails every admin that has an address. The email has no
-// answers in it (they can include secrets such as API keys); it links to
-// the submission instead.
+// notifySubmission sends the emails for a new submission: a notice to every
+// admin with an address, and (when enabled) a copy of the answers as a PDF
+// to the client who submitted.
 func (s *Server) notifySubmission(sub *store.Submission) {
 	c := s.smtpConfig()
 	if !c.Enabled {
 		return
 	}
+	s.notifyAdmins(c, sub)
+	if c.ClientCopy {
+		s.sendClientCopy(c, sub)
+	}
+}
+
+// notifyAdmins has no answers in the email (they can include secrets such
+// as API keys); it links to the submission instead.
+func (s *Server) notifyAdmins(c mail.Config, sub *store.Submission) {
 	to, err := s.st.AdminEmails()
 	if err != nil || len(to) == 0 {
 		return
@@ -728,4 +743,29 @@ func (s *Server) notifySubmission(sub *store.Submission) {
 		return
 	}
 	s.st.Log(store.ActorSystem, "notifier", "", "smtp.notify", fmt.Sprintf("%s: sent to %d admin(s)", sub.Folder, len(to)))
+}
+
+// sendClientCopy emails the client their answers as the same PDF admins
+// download. Uploaded files are not attached.
+func (s *Server) sendClientCopy(c mail.Config, sub *store.Submission) {
+	var pdf bytes.Buffer
+	if err := export.WritePDF(&pdf, sub.Snapshot, s.meta(sub)); err != nil {
+		s.log.Printf("client copy pdf: %v", err)
+		s.st.Log(store.ActorSystem, "notifier", "", "smtp.client_copy_failed", sub.Folder+": PDF: "+err.Error())
+		return
+	}
+	at := sub.SubmittedAt.In(s.loc)
+	files := "none"
+	if sub.FilesCount > 0 {
+		files = fmt.Sprintf("%d (%s); the files themselves are not attached", sub.FilesCount, export.HumanBytes(sub.FilesBytes))
+	}
+	body := fmt.Sprintf("Hello,\n\nThank you for submitting the form \"%s\". A copy of your answers is attached as a PDF.\n\nSubmitted by:   %s\nSubmitted at:   %s\nUploaded files: %s\n\nIf anything needs to change, reply on the project ticket thread or contact your Bicom Systems representative.\n\nBicom Systems\n",
+		sub.Snapshot.Title, sub.Email, at.Format("2006-01-02 15:04 MST"), files)
+	att := mail.Attachment{Name: export.AnswersName(sub.Email, at, ".pdf"), ContentType: "application/pdf", Data: pdf.Bytes()}
+	if err := mail.Send(c, []string{sub.Email}, "Your submission: "+sub.Snapshot.Title, body, att); err != nil {
+		s.log.Printf("client copy: %v", err)
+		s.st.Log(store.ActorSystem, "notifier", "", "smtp.client_copy_failed", sub.Folder+": "+err.Error())
+		return
+	}
+	s.st.Log(store.ActorSystem, "notifier", "", "smtp.client_copy", sub.Folder+": answers PDF sent to "+sub.Email)
 }

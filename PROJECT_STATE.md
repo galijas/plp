@@ -59,7 +59,9 @@ of 2026-10-06). Nothing is half-done. Open items are under "Next".
   `Uploaded Files - ….zip` (one folder per question). Answers are a
   snapshot of the question wording at submit time.
 - SMTP notifications to every admin with an email; no answers in the
-  email, only a link.
+  email, only a link. Client copy (2026-10-07, on by default, checkbox in
+  Configure SMTP): the submitter gets an email with the answers PDF
+  attached (no uploaded files); logged as smtp.client_copy(_failed).
 - Theme button "Theme: System/Dark/Light" (top right, remembered per
   browser). Header and admin tabs centered. Font Inter (self-hosted).
   Icon: document with upload arrow (from

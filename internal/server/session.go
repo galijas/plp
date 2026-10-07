@@ -274,7 +274,8 @@ func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {
 // handleDone is the confirmation page after a submission. It is reachable
 // without a session: a single-use code's session ends when it submits.
 func (s *Server) handleDone(w http.ResponseWriter, r *http.Request) {
-	s.render(w, r, http.StatusOK, "done.html", page{Title: "Submitted"})
+	c := s.smtpConfig()
+	s.render(w, r, http.StatusOK, "done.html", page{Title: "Submitted", Data: c.Enabled && c.ClientCopy})
 }
 
 // The server is reached directly (no reverse proxy), so RemoteAddr is the client.
