@@ -2,9 +2,11 @@
  *
  * Font: Inter (Bicom Systems' default), self-hosted.
  *
- * The portal collects branding material, so it borrows from the print
- * proof: cool paper, navy ink, one process-cyan accent for actions, and
- * registration magenta only for "required" and errors. Crop marks frame
+ * Colors are Bicom Systems' (bicomsystems.com): navy #0b163f, blue
+ * #175cff, light blue #50b5ff, green #5cc9a7. Light theme: white and
+ * light blue with navy text; dark theme: navy with white text. Red is
+ * used only for "required" and errors. (The --cyan/--magenta token
+ * names are historical: they hold the accent and the error color.) Crop marks frame
  * the places where something is handed over (sign-in and file uploads).
  */
 
@@ -26,52 +28,54 @@
 }
 
 :root {
-  --paper: #eef1f5;
+  /* Light theme: white and Bicom light blue, navy text, Bicom blue actions. */
+  --paper: #f1f7ff;
   --sheet: #ffffff;
-  --sheet-2: #f6f8fb;
-  --ink: #17213a;
-  --ink-2: #4b566e;
-  --ink-3: #6f7a90;
-  --rule: #cfd6e0;
-  --rule-strong: #a9b3c3;
-  --cyan: #0079b3;
+  --sheet-2: #f5f9ff;
+  --ink: #0b163f;
+  --ink-2: #3f4b6b;
+  --ink-3: #5d6888;
+  --rule: #d5e3f5;
+  --rule-strong: #a3b8d8;
+  --cyan: #175cff;
   --cyan-ink: #ffffff;
-  --cyan-wash: #e1f1fa;
-  --magenta: #c2126b;
-  --magenta-wash: #fbe6f0;
-  --ok: #1d7a4a;
-  --ok-wash: #e2f3ea;
+  --cyan-wash: #e4f2ff;
+  --magenta: #c8233a;
+  --magenta-wash: #fde8eb;
+  --ok: #1b7a5c;
+  --ok-wash: #def4ed;
   --warn: #8a5a00;
-  --warn-wash: #fbf0d9;
-  --mark: #17213a;
+  --warn-wash: #fff3d6;
+  --mark: #0b163f;
   --icon: #000000;
-  --focus: #0079b3;
-  --shadow: 0 1px 0 rgba(23, 33, 58, .06), 0 8px 24px -12px rgba(23, 33, 58, .18);
+  --focus: #175cff;
+  --shadow: 0 1px 0 rgba(11, 22, 63, .05), 0 8px 24px -12px rgba(11, 22, 63, .2);
   --mono: ui-monospace, "SF Mono", "Cascadia Mono", "DejaVu Sans Mono", Menlo, Consolas, monospace;
   color-scheme: light;
 }
 
 :root[data-theme="dark"] {
-  --paper: #0f1729;
-  --sheet: #162038;
-  --sheet-2: #1b2742;
-  --ink: #e5e9f1;
-  --ink-2: #a7b1c5;
-  --ink-3: #8390a8;
-  --rule: #2b3954;
-  --rule-strong: #43547a;
-  --cyan: #45b7ea;
-  --cyan-ink: #0b1424;
-  --cyan-wash: #12324a;
-  --magenta: #f2639f;
-  --magenta-wash: #3d1a2d;
-  --ok: #5fcf95;
-  --ok-wash: #15372a;
-  --warn: #f0c060;
-  --warn-wash: #3a2f14;
-  --mark: #cfd8e8;
+  /* Dark theme: Bicom navy with white text, Bicom light blue actions. */
+  --paper: #0b163f;
+  --sheet: #12214f;
+  --sheet-2: #172959;
+  --ink: #ffffff;
+  --ink-2: #c5cee6;
+  --ink-3: #98a5c8;
+  --rule: #253a72;
+  --rule-strong: #3d5594;
+  --cyan: #50b5ff;
+  --cyan-ink: #0b163f;
+  --cyan-wash: #163d78;
+  --magenta: #ff7a8a;
+  --magenta-wash: #4a1d35;
+  --ok: #5cc9a7;
+  --ok-wash: #123f45;
+  --warn: #ffb116;
+  --warn-wash: #3d3420;
+  --mark: #50b5ff;
   --icon: #ffffff;
-  --focus: #45b7ea;
+  --focus: #50b5ff;
   --shadow: 0 1px 0 rgba(0, 0, 0, .25), 0 12px 28px -14px rgba(0, 0, 0, .6);
   color-scheme: dark;
 }
@@ -664,7 +668,7 @@ dialog {
   color: var(--ink);
   box-shadow: var(--shadow);
 }
-dialog::backdrop { background: rgba(10, 16, 30, .55); }
+dialog::backdrop { background: rgba(11, 22, 63, .6); }
 dialog .dlg-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px 0; }
 dialog .dlg-head h2 { margin: 0; font-size: 1.25rem; }
 dialog .dlg-body { padding: 16px 22px 22px; max-height: 70vh; overflow: auto; }

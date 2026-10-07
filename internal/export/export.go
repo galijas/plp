@@ -87,15 +87,15 @@ func WritePDF(w io.Writer, snap formdef.Snapshot, m Meta) error {
 	pdf.SetFooterFunc(func() {
 		pdf.SetY(-12)
 		pdf.SetFont("dv", "", 8)
-		pdf.SetTextColor(110, 118, 135)
+		pdf.SetTextColor(93, 104, 136)
 		pdf.CellFormat(0, 5, fmt.Sprintf("%s · %s · page %d", m.Email, Stamp(m.SubmittedAt), pdf.PageNo()), "", 0, "R", false, 0, "")
 	})
 	pdf.AddPage()
 	width, _ := pdf.GetPageSize()
 	textW := width - 40
 
-	ink := func() { pdf.SetTextColor(22, 30, 48) }
-	muted := func() { pdf.SetTextColor(95, 104, 122) }
+	ink := func() { pdf.SetTextColor(11, 22, 63) }
+	muted := func() { pdf.SetTextColor(93, 104, 136) }
 
 	pdf.SetFont("dv", "B", 17)
 	ink()
@@ -125,7 +125,7 @@ func WritePDF(w io.Writer, snap formdef.Snapshot, m Meta) error {
 		ink()
 		pdf.MultiCell(textW, 7, sec.Title, "", "L", false)
 		y := pdf.GetY() + 1
-		pdf.SetDrawColor(0, 137, 199)
+		pdf.SetDrawColor(23, 92, 255)
 		pdf.SetLineWidth(0.5)
 		pdf.Line(20, y, 20+textW, y)
 		pdf.Ln(3)
@@ -158,7 +158,7 @@ func WritePDF(w io.Writer, snap formdef.Snapshot, m Meta) error {
 			}
 			// Answer bar, only when the answer stayed on one page.
 			if bottom := pdf.GetY(); bottom > top {
-				pdf.SetDrawColor(0, 137, 199)
+				pdf.SetDrawColor(23, 92, 255)
 				pdf.SetLineWidth(0.8)
 				pdf.Line(21, top+0.6, 21, bottom-0.6)
 			}

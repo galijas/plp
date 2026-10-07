@@ -84,7 +84,10 @@ of 2026-10-06). Nothing is half-done. Open items are under "Next".
   leftover tables with policy accept.)
 - Time zone is not asked by the installer: Europe/Sarajevo, editable as
   PLP_TIMEZONE in the env file.
-- Visual design: cool paper / navy ink / process cyan, magenta for
+- Visual design (2026-10-07): Bicom Systems colors from bicomsystems.com:
+  light = white + light blue (#f1f7ff) with navy #0b163f text and blue
+  #175cff actions; dark = navy #0b163f with white text and light blue
+  #50b5ff actions; red for required and errors. Earlier: cool paper / navy ink / process cyan, magenta for
   required and errors, crop marks around sign-in and upload zones.
   Inline style attributes are blocked by the CSP; use classes.
 
