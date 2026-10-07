@@ -104,7 +104,8 @@ of 2026-10-06). Nothing is half-done. Open items are under "Next".
   PLP_TIMEZONE in the env file.
 - Dark theme (changed 2026-10-07 at the user's request): DT Collector /
   SwarmDialer dark palette (#0b0d12 / #12151c / #171b25 surfaces, text
-  #e7e9f0, muted #8b93a7, amber #ffb454 actions, links #5eb1ff, ok
+  #e7e9f0, muted #8b93a7, actions in the login-button blue #50b5ff
+  (DT Collector amber dropped 2026-10-07), links #5eb1ff, ok
   #3ddc97, errors #ff5470); dark sign-in button stays #50b5ff. Light
   theme unchanged (Bicom colors, below; light sign-in button #148acb).
 - Visual design (2026-10-07): Bicom Systems colors from bicomsystems.com:

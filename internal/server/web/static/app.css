@@ -4,8 +4,8 @@
  *
  * Light theme: Bicom Systems colors (bicomsystems.com): white and light
  * blue with navy #0b163f text and blue #175cff actions. Dark theme: the
- * DT Collector / SwarmDialer dark palette (amber #ffb454 actions, blue
- * #5eb1ff links). Red is
+ * DT Collector / SwarmDialer dark palette with light blue #50b5ff
+ * actions and blue #5eb1ff links. Red is
  * used only for "required" and errors. (The --cyan/--magenta token
  * names are historical: they hold the accent and the error color.) Crop marks frame
  * the places where something is handed over (sign-in and file uploads).
@@ -58,8 +58,8 @@
 
 :root[data-theme="dark"] {
   /* Dark theme: the DT Collector / SwarmDialer dark palette (near-black
-     blue-grey surfaces, amber actions, blue links). The sign-in button
-     keeps its own colors (--login-btn below). */
+     blue-grey surfaces, blue links), with the sign-in button's light blue
+     #50b5ff as the accent instead of DT Collector's amber. */
   --paper: #0b0d12;
   --sheet: #12151c;
   --sheet-2: #171b25;
@@ -68,9 +68,9 @@
   --ink-3: #8b93a7;
   --rule: #262c3d;
   --rule-strong: #3a3f4d;
-  --cyan: #ffb454;
-  --cyan-ink: #1a1305;
-  --cyan-wash: #2a2114;
+  --cyan: #50b5ff;
+  --cyan-ink: #0b163f;
+  --cyan-wash: #12263a;
   --link: #5eb1ff;
   --magenta: #ff5470;
   --magenta-wash: #2c141b;
@@ -80,7 +80,7 @@
   --warn-wash: #2a2114;
   --mark: #8b93a7;
   --icon: #ffffff;
-  --focus: #ffb454;
+  --focus: #50b5ff;
   --shadow: 0 1px 0 rgba(0, 0, 0, .3), 0 12px 28px -14px rgba(0, 0, 0, .7);
   color-scheme: dark;
 }
