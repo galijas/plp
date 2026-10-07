@@ -123,7 +123,10 @@ code, .code { font-family: var(--mono); font-size: .92em; }
   position: relative;
   z-index: 20;
 }
-.topbar .brand { grid-column: 2; }
+.topbar .brand { grid-column: 2; position: relative; }
+/* The name is what lines up with the centered content; the icon sits
+   outside it, to the left. */
+.topbar .brand svg { position: absolute; right: calc(100% + 10px); top: 50%; transform: translateY(-50%); }
 .top-right {
   grid-column: 3;
   display: flex;
@@ -341,7 +344,26 @@ input[type="radio"], input[type="checkbox"] { accent-color: var(--cyan); width: 
   opacity: .55;
 }
 
-/* ---------- Sign-in ---------- */
+/* ---------- Sign-in ----------
+ * The box follows the Bicom Systems login page (login.bicomsystems.com):
+ * a plain card with a 5 px radius and a soft two-layer shadow, outlined
+ * fields with floating labels, and a full-width flat button in the
+ * login page's blue (#148acb), uppercase like the original. */
+
+:root {
+  --login-btn: #148acb;
+  --login-btn-hover: #1179b3;
+  --login-title: #4c4c4c;
+  --login-field: rgba(0, 0, 0, .38);
+  --login-field-hover: rgba(0, 0, 0, .87);
+  --login-shadow: rgba(60, 66, 87, .12) 0 7px 14px, rgba(0, 0, 0, .12) 0 3px 6px;
+}
+:root[data-theme="dark"] {
+  --login-title: var(--ink-2);
+  --login-field: rgba(255, 255, 255, .38);
+  --login-field-hover: rgba(255, 255, 255, .87);
+  --login-shadow: rgba(0, 0, 0, .35) 0 7px 14px, rgba(0, 0, 0, .3) 0 3px 6px;
+}
 
 .signin-wrap {
   min-height: calc(100vh - 140px);
@@ -352,23 +374,72 @@ input[type="radio"], input[type="checkbox"] { accent-color: var(--cyan); width: 
 .signin {
   width: min(440px, 100%);
   background: var(--sheet);
-  border: 1px solid var(--rule);
-  border-radius: 4px;
-  padding: 36px 36px 28px;
-  box-shadow: var(--shadow);
+  border-radius: 5px;
+  padding: 30px;
+  box-shadow: var(--login-shadow);
 }
-.signin h1 { font-size: 1.75rem; letter-spacing: -.02em; font-weight: 700; }
-.signin .lede { color: var(--ink-2); margin: 10px 0 26px; }
-.signin .btn.primary { width: 100%; margin-top: 6px; }
+.signin h1 { font-size: 18px; font-weight: 400; color: var(--login-title); letter-spacing: 0; }
+.signin .lede { color: var(--ink-2); font-size: .9375rem; margin: 10px 0 25px; }
+.signin .flash { margin-bottom: 20px; }
+
+.ofield { position: relative; margin-bottom: 22px; }
+.ofield input {
+  height: 56px;
+  padding: 0 16px;
+  border: 1px solid var(--login-field);
+  border-radius: 4px;
+  background: transparent;
+  font-size: 16px;
+}
+.ofield input:hover { border-color: var(--login-field-hover); }
+.ofield input:focus { border: 2px solid var(--login-btn); padding: 0 15px; box-shadow: none; }
+.ofield label {
+  position: absolute;
+  left: 12px;
+  top: 28px;
+  transform: translateY(-50%);
+  padding: 0 4px;
+  font-weight: 400;
+  color: var(--ink-3);
+  pointer-events: none;
+  transition: top .15s, font-size .15s, color .15s;
+  background: var(--sheet);
+  line-height: 1;
+}
+.ofield input:focus + label,
+.ofield input:not(:placeholder-shown) + label,
+.ofield input:-webkit-autofill + label { top: 0; font-size: 12px; }
+.ofield input:focus + label { color: var(--login-btn); }
+.signin input[name="code"] { font-family: var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+
+.login-btn {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 15px 0;
+  border: 0;
+  border-radius: 4px;
+  background: var(--login-btn);
+  color: #fff;
+  font: inherit;
+  font-size: .875rem;
+  font-weight: 500;
+  letter-spacing: .0892857143em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background .2s;
+}
+.login-btn:hover { background: var(--login-btn-hover); }
+.login-btn:focus-visible { outline: 2px solid var(--login-btn); outline-offset: 3px; }
+
 .signin .alt {
-  margin-top: 22px;
-  padding-top: 18px;
+  margin: 25px 0 0;
+  padding-top: 20px;
   border-top: 1px solid var(--rule);
   font-size: .9375rem;
-  color: var(--ink-2);
+  color: var(--login-title);
   text-align: center;
 }
-.signin input[name="code"] { font-family: var(--mono); letter-spacing: .06em; text-transform: uppercase; }
 
 .slug {
   display: block;
@@ -775,6 +846,7 @@ dialog .dlg-foot { display: flex; gap: 8px; justify-content: flex-end; padding: 
 }
 
 @media (max-width: 640px) {
+  .topbar .brand svg { position: static; transform: none; }
   .topbar { display: flex; flex-wrap: wrap; padding: 10px 16px; gap: 10px; }
   .top-right { flex: 1; gap: 10px; }
   .brand span { display: none; }
